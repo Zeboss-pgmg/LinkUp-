@@ -53,8 +53,8 @@ const people: Person[] = [
     name: "Léa",
     skill: "Des ongles, une signature.",
     category: "Beauté & création",
-    image: "/images/nails.png",
-    avatar: "/images/lea.svg",
+    image: "./images/nails.png",
+    avatar: "./images/lea.svg",
     theme: "rose",
     description:
       "J’adore transformer une idée en petits détails colorés. Je te propose une initiation au nail art : préparation, motifs et création de ton propre style.",
@@ -67,8 +67,8 @@ const people: Person[] = [
     name: "Noah",
     skill: "Ton regard. En images.",
     category: "Photo & vidéo",
-    image: "/images/camera.svg",
-    avatar: "/images/noah.svg",
+    image: "./images/camera.svg",
+    avatar: "./images/noah.svg",
     theme: "sage",
     description:
       "Lumière, cadrage, petits moments : je te partage mes astuces pour faire de belles photos avec ton téléphone. On apprend en créant ensemble.",
@@ -81,8 +81,8 @@ const people: Person[] = [
     name: "Inès",
     skill: "Un peu de terre. Beaucoup d’idées.",
     category: "Art & artisanat",
-    image: "/images/pottery.svg",
-    avatar: "/images/ines.svg",
+    image: "./images/pottery.svg",
+    avatar: "./images/ines.svg",
     theme: "peach",
     description:
       "Une première découverte de la céramique, sans pression. On imagine une forme et on apprend les gestes de base pour la façonner.",
@@ -95,8 +95,8 @@ const people: Person[] = [
     name: "Adam",
     skill: "Les bonnes notes, ensemble.",
     category: "Musique",
-    image: "/images/guitar.svg",
-    avatar: "/images/noah.svg",
+    image: "./images/guitar.svg",
+    avatar: "./images/noah.svg",
     theme: "lavender",
     description:
       "Tu veux commencer la guitare ? Je te montre quelques accords et on joue ton premier morceau à ton rythme.",
