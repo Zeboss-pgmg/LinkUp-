@@ -1,0 +1,17 @@
+{
+  "name": "SkillSwap",
+  "short_name": "SkillSwap",
+  "lang": "fr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4e8eb",
+  "theme_color": "#f4e8eb",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

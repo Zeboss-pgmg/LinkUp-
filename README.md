@@ -1,6 +1,6 @@
 # SkillSwap — prototype scolaire
 
-Document de référence pour reprendre la conception de l’application. Il rassemble les décisions discutées le 12 octobre 2026. Aucun code applicatif n’a encore été écrit et aucune technologie n’a été choisie.
+Document de référence pour reprendre la conception de l’application. Il rassemble les décisions discutées depuis le 12 octobre 2026. La première version web a été autorisée puis réalisée le 14 octobre 2026 avec React, TypeScript et Vite.
 
 ## Concept
 
@@ -19,7 +19,7 @@ L’application doit à la fois présenter la startup pour l’école et démont
 - **Échange direct :** deux personnes conviennent des services qu’elles se rendent mutuellement, par exemple de l’aide en anglais contre du montage vidéo.
 - **Crédits fictifs :** une personne gagne des crédits en réalisant un service, puis peut les utiliser auprès d’un autre membre. Il n’est pas nécessaire que les deux personnes s’aident réciproquement.
 
-Le concept initial nomme ces crédits **SkillCoins** ; le nom **LinkCoins** a ensuite été utilisé. Le nom définitif reste à confirmer.
+Le concept initial nomme ces crédits **SkillCoins** ; le nom **LinkCoins** a ensuite été utilisé. Le nom définitif reste à confirmer ; cette première version utilise « points LinkUp », selon la formulation récente du porteur du projet.
 
 La règle « une heure = un crédit » est une possibilité initiale, pas une décision validée. La tarification, les fractions d’heure et les règles de l’échange direct restent ouvertes.
 
@@ -39,11 +39,13 @@ Une messagerie entre amis inspirée d’Instagram et des appels inspirés de Tea
 
 ## Organisation de l’application
 
-- **Accueil : notre profil personnel.** L’accueil n’est pas une page de présentation commerciale de la startup.
+- **Accueil / Découverte :** la première page permet de parcourir les profils.
 - **Découverte :** une section pour parcourir des profils, avec un profil principal à la fois et la possibilité de « matcher » pour échanger des services. La présentation s’inspire des applications de rencontre, mais le match porte sur l’entraide.
-- **Trois autres parties :** à définir par le porteur du projet. Ne pas les inventer lors de l’implémentation.
+- **Profil :** deuxième section, avec présentation, compétences, annonces, personnalisation et points LinkUp.
+- **Messages :** conversations autour des services et entre amis. Le premier DM ouvre directement une conversation.
+- **Calendrier :** accessible par un bouton discret allongé dans le profil ; panneau presque plein écran sur téléphone et fenêtre centrée sur ordinateur. Il ne constitue pas un onglet supplémentaire.
 
-Le placement de la présentation du modèle économique reste à décider.
+Une courte présentation du projet et une piste de modèle économique à discuter sont accessibles depuis le profil et le badge « Démo scolaire ».
 
 ## Direction artistique
 
@@ -98,19 +100,68 @@ Limiter les effets de flou coûteux, adapter les images à leur affichage et pri
 
 - Nom définitif des crédits : SkillCoins ou LinkCoins.
 - Tranche d’âge et langue finale de l’interface ; les échanges de conception sont actuellement en français.
-- Les trois autres sections et leur contenu.
+- L’éventuel besoin de sections supplémentaires ; trois onglets sont désormais définis.
 - Palettes, décors, logo, typographie et paramètres de personnalisation.
 - Contenu détaillé du recto et du verso, contrôle du match et règles qui suivent un match.
 - Règles des crédits, durées, annulation et confirmation des services.
 - Place de la messagerie, des amis et des appels dans le prototype.
 - Fonctions de signalement et de modération à démontrer.
 - Présentation du modèle économique.
-- Technologie, stockage de la démonstration et fonctionnement sur ordinateur.
+- Distribution iOS/Android native ultérieure. La première version est web, pensée pour iPhone et utilisable sur ordinateur, avec stockage local sur chaque appareil.
 
 ## Reprise et dépôt
 
 Le dépôt GitHub fourni est `Zeboss-pgmg/LinkUp-`. Il doit conserver le futur code pour permettre sa récupération sur le PC du porteur du projet.
 
-À la reprise, lire ce document et les éventuelles instructions du dépôt avant de travailler. Continuer à préciser le produit avec le porteur du projet. Ne pas choisir une technologie ni prendre une décision produit majeure sans lui demander. La discussion reste actuellement en phase de conception ; ce README ne donne pas à lui seul l’autorisation de commencer l’application.
+À la reprise, lire ce document et les éventuelles instructions du dépôt avant de travailler. Continuer à préciser le produit avec le porteur du projet. Ne pas choisir une technologie ni prendre une décision produit majeure sans lui demander. Le développement de la première version a été explicitement autorisé. Les décisions produit majeures encore ouvertes doivent rester discutées avec le porteur du projet.
 
 Dans les tâches cloud, utiliser le checkout existant : chaque tâche dispose déjà d’un environnement isolé. Ne pas créer de worktree sauf demande explicite.
+
+
+## Première version — lancement
+
+Prérequis : Node.js 22 ou 24 et npm. Depuis la racine du dépôt :
+
+```sh
+npm ci
+npm run dev
+```
+
+Pour produire la version à héberger :
+
+```sh
+npm run build
+npm run preview
+```
+
+Le dossier `dist/` peut être publié sur un hébergement statique HTTPS. La publication n’est pas réalisée par le simple push GitHub. Sur iPhone : ouvrir l’adresse HTTPS dans Safari, puis Partager → Sur l’écran d’accueil. Il s’agit d’une application web, pas d’une application native ni d’une publication App Store. Pas de fonctionnement hors connexion garanti.
+
+### Fonctionnalités réalisées
+
+- Quatre profils fictifs, ambiances coordonnées et filtres par compétences.
+- Geste à droite ou diagonal haut-droite pour retourner la carte ; geste inverse pour le recto ; geste vers le bas pour le profil suivant. Alternative ordinateur : flèches du clavier sur la carte et bouton de profil suivant.
+- Signe d’intérêt avec état « en attente » ; la démo ne simule pas une véritable acceptation par un autre utilisateur.
+- Conversations locales, sans transmission réseau ni interlocuteur réel.
+- Réservation fictive depuis une conversation, choix échange direct ou points, débit simulé, remboursement après annulation et confirmation de réalisation.
+- Calendrier d’exemple en octobre 2026, consultable par mois. Les créneaux proposés sont fixes pour la démonstration.
+- Modification du profil fictif et quatre ambiances au choix pour le profil et la messagerie. Le choix indépendant de thèmes pour toutes les sections et l’import de bannières restent à développer.
+- Signalement simulé, blocage local et conseils de prudence. Aucune modération réelle.
+- Données conservées dans le stockage local du navigateur : aucun compte, serveur, paiement ou appel réel. La sauvegarde GitHub conserve le code, pas les conversations locales.
+
+Les noms, compétences et messages sont fictifs. Le visuel d’ongles est généré pour ce prototype ; les autres images et avatars sont des illustrations SVG créées pour le projet. Toutes les images et polices sont livrées localement. Les polices Instrument Serif et DM Sans sont fournies via leurs paquets Fontsource ; leurs licences sont incluses dans ces paquets.
+
+### Vérification
+
+```sh
+npm test
+```
+
+Les tests Playwright utilisent Chromium installé à `/usr/bin/chromium` dans l’environnement cloud. Sur un autre ordinateur, définir `CHROMIUM_PATH` vers un exécutable Chromium/Chrome, ou adapter `playwright.config.ts` pour utiliser un navigateur Playwright installé. Les captures sont générées dans `test-results/` et ne sont pas versionnées.
+
+La compilation TypeScript et production ainsi que les parcours de découverte, message, réservation, annulation, thèmes et persistance sont vérifiés sous Chromium aux dimensions d’iPhone et d’ordinateur. Un essai sur un véritable iPhone/Safari reste nécessaire pour confirmer les performances et le comportement tactile iOS.
+
+### Aperçus de la première version
+
+[Vue iPhone](docs/apercu-iphone.png) · [Vue ordinateur](docs/apercu-desktop.png)
+
+![Première version sur iPhone](docs/apercu-iphone.png)

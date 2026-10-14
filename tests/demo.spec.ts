@@ -1,0 +1,128 @@
+import { test, expect } from "@playwright/test";
+test("discovery gestures, interest, conversation and reservation lifecycle", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Des ongles, une signature." }),
+  ).toBeVisible();
+  const card = page.getByRole("group");
+  const box = (await card.boundingBox())!;
+  await page.mouse.move(box.x + 60, box.y + 170);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 170, box.y + 110, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByText("Moi, c’est")).toBeVisible();
+  await card.focus();
+  await page.keyboard.press("ArrowLeft");
+  await page.getByRole("button", { name: "Ça m’intéresse" }).click();
+  await expect(
+    page.getByRole("button", { name: "Intérêt envoyé" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Écrire à Léa" }).click();
+  await page
+    .getByRole("textbox", { name: "Ton message" })
+    .fill("Salut, je voudrais découvrir le nail art !");
+  await page.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(
+    page.getByText("Salut, je voudrais découvrir le nail art !").last(),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Planifier un échange" }).click();
+  await page.getByRole("button", { name: "1 point(s) fictif(s)" }).click();
+  await page
+    .getByRole("button", { name: "Confirmer la réservation fictive" })
+    .click();
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await expect(page.locator(".balance")).toContainText("3");
+  await page.getByRole("button", { name: "Mon calendrier" }).click();
+  await expect(page.getByText("Léa · Beauté & création")).toBeVisible();
+  await page.getByRole("button", { name: "Annuler", exact: true }).click();
+  await page.getByRole("button", { name: "Fermer", exact: true }).click();
+  await expect(page.locator(".balance")).toContainText("4");
+  await page.reload();
+  await page.getByRole("button", { name: "Messages", exact: true }).click();
+  await page.getByRole("button", { name: /Léa Salut/ }).click();
+  await expect(
+    page.getByText("Salut, je voudrais découvrir le nail art !").last(),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+test("themes, filters, downward gesture and mobile layout", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Filtrer les profils" }).click();
+  await page
+    .getByRole("button", { name: "Photo & vidéo", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Ton regard. En images." }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Filtrer les profils" }).click();
+  await page
+    .getByRole("button", { name: "Tout explorer", exact: true })
+    .click();
+  const b = (await page.getByRole("group").boundingBox())!;
+  await page.mouse.move(b.x + 130, b.y + 80);
+  await page.mouse.down();
+  await page.mouse.move(b.x + 130, b.y + 190, { steps: 8 });
+  await page.mouse.up();
+  await expect(
+    page.getByRole("heading", { name: "Ton regard. En images." }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await page.getByRole("button", { name: "Mon ambiance" }).click();
+  await page.getByRole("button", { name: "Jardin sauge" }).click();
+  await page.getByRole("button", { name: "Fermer", exact: true }).click();
+  await expect(page.locator(".app")).toHaveClass(/theme-sage/);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
+test("all bundled images load, desktop and small iPhone screenshots", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator(".hero-image")).toBeVisible();
+  await page.waitForFunction(() =>
+    Array.from(document.images).every((i) => i.complete && i.naturalWidth > 0),
+  );
+  await page.screenshot({ path: "test-results/desktop.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "test-results/iphone.png", fullPage: true });
+  await page.setViewportSize({ width: 320, height: 568 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "test-results/small-iphone.png",
+    fullPage: true,
+  });
+});
+test("profile edits persist and simulated blocking removes a profile", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await page.getByRole("button", { name: "Modifier mon profil" }).click();
+  await page.getByLabel("Prénom ou pseudo fictif").fill("Camille");
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Camille." })).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Camille." })).toBeVisible();
+  await page.getByRole("button", { name: "Découverte", exact: true }).click();
+  await page.getByRole("button", { name: "Signaler ou bloquer" }).click();
+  await page.getByRole("button", { name: "Bloquer ce profil" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Des ongles, une signature." }),
+  ).toHaveCount(0);
+});
