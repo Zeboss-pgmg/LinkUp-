@@ -171,3 +171,11 @@ La compilation TypeScript et production ainsi que les parcours de découverte, m
 Une version compilée est préparée sur la branche `gh-pages`. Pour activer l’hébergement : dans Settings → Pages du dépôt, choisir **Deploy from a branch**, branche **gh-pages**, dossier **/(root)**, puis **Save**. GitHub affiche ensuite l’adresse publiée. L’adresse attendue est `https://zeboss-pgmg.github.io/LinkUp-/`, mais elle n’est active qu’après activation et déploiement par GitHub. Les chemins relatifs ont été vérifiés en servant la version compilée sous un sous-dossier.
 
 Après une modification du code, il faudra reconstruire et mettre à jour la branche `gh-pages` ; le push de `main` seul ne met pas à jour cette version statique.
+
+### Déploiement Vercel (option retenue)
+
+Le dépôt contient `vercel.json` avec les paramètres Vite : installation `npm ci`, compilation `npm run build`, sortie `dist/`.
+
+Depuis un compte Vercel, importer `Zeboss-pgmg/LinkUp-` avec l’intégration GitHub et choisir la branche de production `main`, sans sous-dossier racine ni variables secrètes. Autoriser l’accès au dépôt s’il est privé, puis lancer Deploy. Vercel fournit l’adresse HTTPS après le déploiement. Les prochains pushs sur `main` pourront déclencher les mises à jour automatiquement.
+
+Le dépôt et sa configuration sont prêts ; cela ne signifie pas que le projet a déjà été importé ou publié sur Vercel.
