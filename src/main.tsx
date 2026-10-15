@@ -130,9 +130,22 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 function App() {
-  const [welcome, setWelcome] = useState(() => !read("ss-onboarded-v2", false));
+  const [welcome, setWelcome] = useState<boolean>(
+    () =>
+      new URLSearchParams(window.location.search).get("guide") === "1" ||
+      !read("ss-onboarded-v2", false),
+  );
   function enterApp() {
     setWelcome(false);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("guide")) {
+      url.searchParams.delete("guide");
+      window.history.replaceState(
+        null,
+        "",
+        url.pathname + url.search + url.hash,
+      );
+    }
     try {
       localStorage.setItem("ss-onboarded-v2", "true");
     } catch {
@@ -162,6 +175,21 @@ function App() {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [drag, setDrag] = useState(0);
+  const [verticalDrag, setVerticalDrag] = useState(0);
+  const [leaving, setLeaving] = useState(false);
+  const transition = useRef(false);
+  const nextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const direction = useRef<"turn" | "next" | null>(null);
+  const cardElement = useRef<HTMLDivElement>(null);
+  const restoreCardFocus = useRef(false);
+  const chatScroll = useRef<HTMLDivElement>(null);
+  const composerInput = useRef<HTMLInputElement>(null);
+  useEffect(
+    () => () => {
+      if (nextTimer.current) clearTimeout(nextTimer.current);
+    },
+    [],
+  );
   const [likes, setLikes] = useState<number[]>(() => read("ss-likes", []));
   const [blocked, setBlocked] = useState<number[]>(() =>
     read("ss-blocked", []),
@@ -176,6 +204,17 @@ function App() {
   const [ownTheme, setOwnTheme] = useState(() => read("ss-theme", "lavender"));
   const [chat, setChat] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
+  useEffect(() => {
+    const node = chatScroll.current;
+    if (node)
+      node.scrollTo({
+        top: node.scrollHeight,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
+  }, [messages, chat, tab]);
+
   const [modal, setModal] = useState<string | null>(null);
   const [toast, setToast] = useState("");
   const [day, setDay] = useState(16);
@@ -184,6 +223,7 @@ function App() {
   const [profile, setProfile] = useState(() =>
     read("ss-profile", {
       name: "Gabriel",
+      avatar: "./images/noah.webp",
       bio: "Curieux de tout. Toujours partant pour apprendre.",
       skills: "Montage vidéo, Informatique, Créativité",
       looking: "Photographie, guitare et un peu de tout le reste.",
@@ -233,6 +273,12 @@ function App() {
       (category === "Tout explorer" || p.category === category),
   );
   const person = filtered[index % Math.max(filtered.length, 1)];
+  useEffect(() => {
+    if (restoreCardFocus.current) {
+      cardElement.current?.focus({ preventScroll: true });
+      restoreCardFocus.current = false;
+    }
+  }, [person?.id]);
   const chatting = people.find((p) => p.id === chat);
   const theme = tab === "discover" ? person?.theme || "rose" : ownTheme;
   const persist = (key: string, value: unknown) => {
@@ -248,9 +294,20 @@ function App() {
     timer.current = setTimeout(() => setToast(""), 3500);
   }
   function next() {
-    setIndex((i) => i + 1);
-    setFlipped(false);
-    setDrag(0);
+    if (transition.current) return;
+    transition.current = true;
+    setLeaving(true);
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 0
+      : 170;
+    nextTimer.current = setTimeout(() => {
+      setIndex((i) => i + 1);
+      setFlipped(false);
+      setDrag(0);
+      setVerticalDrag(0);
+      setLeaving(false);
+      transition.current = false;
+    }, delay);
   }
   function like(p: Person) {
     if (likes.includes(p.id)) {
@@ -330,16 +387,27 @@ function App() {
     notify("Réservation annulée");
   }
   function onPointerDown(e: React.PointerEvent) {
-    if ((e.target as HTMLElement).closest("button")) return;
+    if (transition.current || (e.target as HTMLElement).closest("button"))
+      return;
+    direction.current = null;
     start.current = { x: e.clientX, y: e.clientY };
     moved.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: React.PointerEvent) {
     if (!moved.current) return;
-    const dx = e.clientX - start.current.x;
-    setDrag(Math.max(-55, Math.min(55, dx / 3)));
+    const dx = e.clientX - start.current.x,
+      dy = e.clientY - start.current.y;
+    if (!direction.current && Math.max(Math.abs(dx), Math.abs(dy)) > 10) {
+      direction.current =
+        Math.abs(dx) > Math.abs(dy) * 0.55 ? "turn" : dy > 0 ? "next" : null;
+    }
+    if (direction.current === "turn")
+      setDrag(Math.max(-55, Math.min(55, dx / 3)));
+    if (direction.current === "next")
+      setVerticalDrag(Math.max(0, Math.min(110, dy * 0.55)));
   }
+
   function onPointerUp(e: React.PointerEvent) {
     if (!moved.current) return;
     moved.current = false;
@@ -351,6 +419,8 @@ function App() {
       next();
     }
     setDrag(0);
+    setVerticalDrag(0);
+    direction.current = null;
   }
   return (
     <div
@@ -385,7 +455,7 @@ function App() {
             onClick={() => setTab("profile")}
             aria-label="Mon profil"
           >
-            {profile.name.charAt(0).toUpperCase()}
+            <img src={profile.avatar || "./images/noah.webp"} alt="" />
           </button>
         </div>
       </header>
@@ -414,8 +484,27 @@ function App() {
               </div>
               {person ? (
                 <>
-                  <div className="card-perspective">
+                  <div
+                    key={person.id}
+                    className={`card-perspective ${leaving ? "is-leaving" : ""}`}
+                  >
+                    {(verticalDrag > 12 || Math.abs(drag) > 8) && (
+                      <div className="gesture-cue" aria-hidden="true">
+                        {verticalDrag > 12 ? (
+                          <>
+                            <ArrowDown size={17} />
+                            Profil suivant
+                          </>
+                        ) : (
+                          <>
+                            <Repeat2 size={17} />
+                            Retourner
+                          </>
+                        )}
+                      </div>
+                    )}
                     <div
+                      ref={cardElement}
                       className="profile-card"
                       tabIndex={0}
                       role="group"
@@ -427,6 +516,7 @@ function App() {
                         }
                         if (e.key === "ArrowDown") {
                           e.preventDefault();
+                          restoreCardFocus.current = true;
                           next();
                         }
                       }}
@@ -436,9 +526,11 @@ function App() {
                       onPointerCancel={() => {
                         moved.current = false;
                         setDrag(0);
+                        setVerticalDrag(0);
+                        direction.current = null;
                       }}
                       style={{
-                        transform: `rotateY(${(flipped ? 180 : 0) + drag}deg)`,
+                        transform: `translate3d(0, ${verticalDrag}px, 0) rotateY(${(flipped ? 180 : 0) + drag}deg)`,
                       }}
                     >
                       <article className="card-face card-front" inert={flipped}>
@@ -671,7 +763,29 @@ function App() {
                       <ShieldCheck size={18} />
                     </button>
                   </div>
-                  <div className="chat-messages">
+                  <div className="chat-service-strip">
+                    <img src={chatting.image} alt="" />
+                    <div>
+                      <span>VOTRE ÉCHANGE</span>
+                      <strong>{chatting.category}</strong>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setDay(16);
+                        setMode("direct");
+                        setModal("booking");
+                      }}
+                    >
+                      Proposer un créneau <ArrowUpRight size={14} />
+                    </button>
+                  </div>
+                  <div
+                    className="chat-messages"
+                    ref={chatScroll}
+                    role="log"
+                    aria-label="Messages de la conversation"
+                    aria-live="polite"
+                  >
                     <span className="chat-date">
                       Une rencontre, de nouvelles idées.
                     </span>
@@ -685,8 +799,31 @@ function App() {
                       réelle.
                     </p>
                   </div>
+                  {!(messages[chatting.id] || []).some((m) => m.mine) && (
+                    <div
+                      className="conversation-starters"
+                      aria-label="Idées pour commencer la conversation"
+                    >
+                      {[
+                        "Comment ça se passe ?",
+                        "Quelles sont tes dispos ?",
+                      ].map((text) => (
+                        <button
+                          key={text}
+                          onClick={() => {
+                            setDraft(text);
+                            composerInput.current?.focus();
+                          }}
+                        >
+                          {text}
+                          <Plus size={13} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <form className="composer" onSubmit={send}>
                     <input
+                      ref={composerInput}
                       aria-label="Ton message"
                       placeholder="Écris un petit bonjour…"
                       value={draft}
@@ -722,7 +859,10 @@ function App() {
                 Mon ambiance
               </button>
               <div className="own-avatar">
-                G
+                <img
+                  src={profile.avatar || "./images/noah.webp"}
+                  alt="Photo du profil fictif"
+                />
                 <span>
                   <Sparkles size={17} />
                 </span>
@@ -809,6 +949,13 @@ function App() {
       </main>
       {!welcome && (
         <nav className="bottom-nav glass" aria-label="Navigation principale">
+          <span
+            className="nav-selection"
+            aria-hidden="true"
+            style={{
+              transform: `translateX(${["discover", "messages", "profile"].indexOf(tab) * 100}%) translateX(${["discover", "messages", "profile"].indexOf(tab) * 3}px)`,
+            }}
+          />
           {[
             { id: "discover", label: "Découverte", icon: Compass },
             { id: "messages", label: "Messages", icon: MessageCircle },
@@ -820,7 +967,7 @@ function App() {
               onClick={() => setTab(t.id)}
               aria-current={tab === t.id ? "page" : undefined}
             >
-              <t.icon size={22} strokeWidth={1.6} />
+              <t.icon size={22} strokeWidth={tab === t.id ? 1.9 : 1.6} />
               <span>{t.label}</span>
               {tab === t.id && <i />}
             </button>
@@ -866,6 +1013,32 @@ function App() {
                   Utilise uniquement des informations fictives pour cette
                   démonstration.
                 </p>
+                <fieldset className="portrait-picker">
+                  <legend>Photo du profil fictif</legend>
+                  {people.map((p) => (
+                    <button
+                      key={p.id}
+                      className={
+                        (profileDraft.avatar || "./images/noah.webp") ===
+                        p.avatar
+                          ? "selected"
+                          : ""
+                      }
+                      onClick={() =>
+                        setProfileDraft({ ...profileDraft, avatar: p.avatar })
+                      }
+                      aria-label={`Choisir le portrait fictif de ${p.name}`}
+                      aria-pressed={
+                        (profileDraft.avatar || "./images/noah.webp") ===
+                        p.avatar
+                      }
+                    >
+                      <img src={p.avatar} alt="" />
+                      {(profileDraft.avatar || "./images/noah.webp") ===
+                        p.avatar && <Check size={13} />}
+                    </button>
+                  ))}
+                </fieldset>
                 {[
                   { key: "name", label: "Prénom ou pseudo fictif" },
                   { key: "bio", label: "Ta petite présentation" },

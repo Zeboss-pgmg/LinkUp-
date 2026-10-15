@@ -239,3 +239,85 @@ test("real touch events flip and advance the card without scrolling the app", as
   expect(await page.evaluate(() => scrollY)).toBe(0);
   await context.close();
 });
+
+test("short guide fits every step on small and large iPhones", async ({
+  page,
+}) => {
+  await page.goto("/?guide=1");
+  for (const size of [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+  ]) {
+    await page.setViewportSize(size);
+    for (let step = 0; step < 3; step++) {
+      await page
+        .getByRole("button", { name: `Étape ${step + 1} :`, exact: false })
+        .click();
+      const cta = await page
+        .getByRole("button", { name: "Accéder à l’appli" })
+        .boundingBox();
+      expect(cta!.y + cta!.height).toBeLessThanOrEqual(size.height);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBeLessThanOrEqual(size.width);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollHeight),
+      ).toBeLessThanOrEqual(size.height + 1);
+    }
+  }
+  await page.getByRole("button", { name: "Accéder à l’appli" }).click();
+  await expect(page).not.toHaveURL(/guide=1/);
+  await expect(page.getByRole("heading", { name: "Découvrir." })).toBeVisible();
+});
+
+test("conversation suggestions fill the composer without sending and retain service context", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Écrire à Léa" }).click();
+  await expect(page.locator(".chat-service-strip")).toContainText(
+    "Beauté & création",
+  );
+  await page.getByRole("button", { name: "Comment ça se passe ?" }).click();
+  await expect(page.getByRole("textbox", { name: "Ton message" })).toHaveValue(
+    "Comment ça se passe ?",
+  );
+  await expect(page.locator(".bubble.mine")).toHaveCount(0);
+  await page.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(page.locator(".bubble.mine")).toHaveText(
+    "Comment ça se passe ?",
+  );
+  await expect(page.locator(".conversation-starters")).toHaveCount(0);
+  await page.getByRole("button", { name: "Proposer un créneau" }).click();
+  await expect(
+    page.getByRole("button", { name: "Confirmer la réservation fictive" }),
+  ).toBeVisible();
+});
+
+test("demo profile portrait persists and keyboard navigation survives card replacement", async ({
+  page,
+}) => {
+  const card = page.getByRole("group");
+  await card.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(
+    page.getByRole("heading", { name: "Photo au smartphone." }),
+  ).toBeVisible();
+  await expect(page.getByRole("group")).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator(".card-back")).not.toHaveAttribute("inert", "");
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await page.getByRole("button", { name: "Modifier mon profil" }).click();
+  await page
+    .getByRole("button", { name: "Choisir le portrait fictif de Inès" })
+    .click();
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await expect(
+    page.getByRole("img", { name: "Photo du profil fictif" }),
+  ).toHaveAttribute("src", "./images/ines.webp");
+  await page.reload();
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await expect(
+    page.getByRole("img", { name: "Photo du profil fictif" }),
+  ).toHaveAttribute("src", "./images/ines.webp");
+});

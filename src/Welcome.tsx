@@ -13,19 +13,19 @@ const steps = [
   {
     number: "01",
     title: "Trouve ton prochain déclic.",
-    text: "Un profil à la fois. Glisse vers le bas pour rencontrer un autre talent.",
+    text: "Glisse vers le bas pour découvrir un autre profil.",
     icon: ArrowDown,
   },
   {
     number: "02",
     title: "Passe de l’autre côté.",
-    text: "Glisse à droite, même en diagonale, pour retourner la carte. À gauche pour revenir.",
+    text: "À droite, les infos. À gauche, la photo. Essaie : la carte suit ton geste.",
     icon: Repeat2,
   },
   {
     number: "03",
     title: "Un intérêt. Un bonjour.",
-    text: "Envoie un signe d’intérêt ou ouvre une conversation. Vous choisissez ensuite les conditions de votre échange.",
+    text: "Un intérêt ou un message, puis un échange à votre rythme.",
     icon: MessageCircle,
   },
 ];
@@ -33,7 +33,10 @@ export default function Welcome({ onEnter }: { onEnter: () => void }) {
   const [step, setStep] = useState(0);
   const current = steps[step];
   return (
-    <section className="welcome" aria-label="Bienvenue et guide de SkillSwap">
+    <section
+      className={`welcome tutorial-step-${step}`}
+      aria-label="Bienvenue et guide de SkillSwap"
+    >
       <div className="welcome-copy">
         <span className="welcome-kicker">
           <span />
@@ -45,11 +48,13 @@ export default function Welcome({ onEnter }: { onEnter: () => void }) {
           Une <em>rencontre.</em>
         </h1>
         <p className="welcome-description">
-          Tu sais faire quelque chose.
-          <br />
-          Quelqu’un aimerait l’apprendre.
+          Tu sais faire quelque chose. Quelqu’un aimerait l’apprendre.
         </p>
         <div className="mini-guide" aria-label="Guide de prise en main">
+          <div className="guide-topline">
+            <span>Le mode d’emploi</span>
+            <span>20 secondes suffisent</span>
+          </div>
           <div className="guide-progress">
             {steps.map((s, i) => (
               <button
@@ -59,7 +64,9 @@ export default function Welcome({ onEnter }: { onEnter: () => void }) {
                 aria-label={`Étape ${i + 1} : ${s.title}`}
                 aria-pressed={i === step}
               >
-                <span>{s.number}</span>
+                <s.icon size={17} strokeWidth={1.7} />
+                <span>{["Découvrir", "Retourner", "Échanger"][i]}</span>
+                <small>{s.number}</small>
               </button>
             ))}
           </div>
@@ -94,24 +101,47 @@ export default function Welcome({ onEnter }: { onEnter: () => void }) {
           UN PETIT APERÇU DE CE QUI T’ATTEND
         </span>
         <div className="preview-card">
-          <img src="./images/nails.webp" alt="" />
-          <div className="preview-shade" />
-          <span className="preview-tag">Beauté & création</span>
-          <div className="preview-copy">
-            <span>À PARTAGER AVEC LÉA</span>
-            <h2>
-              Au bout
-              <br />
-              des doigts.
-            </h2>
-            <div className="preview-person">
+          <div className={`preview-rotator ${step === 1 ? "is-flipped" : ""}`}>
+            <div className="preview-front">
+              <img src="./images/nails.webp" alt="" />
+              <div className="preview-shade" />
+              <span className="preview-tag">Beauté & création</span>
+              <div className="preview-copy">
+                <span>À PARTAGER AVEC LÉA</span>
+                <h2>
+                  Au bout
+                  <br />
+                  des doigts.
+                </h2>
+                <div className="preview-person">
+                  <img src="./images/lea.webp" alt="" />
+                  <span>
+                    Léa<small>Créative jusque dans les détails.</small>
+                  </span>
+                  <Heart size={20} />
+                </div>
+              </div>
+            </div>
+            <div className="preview-back">
               <img src="./images/lea.webp" alt="" />
-              <span>
-                Léa<small>Créative jusque dans les détails.</small>
-              </span>
-              <Heart size={20} />
+              <span>LE PROFIL</span>
+              <h2>Léa</h2>
+              <p>
+                Je partage mes astuces
+                <br />
+                de nail art.
+              </p>
+              <div>
+                <Repeat2 size={17} />
+                Un service contre un autre.
+              </div>
             </div>
           </div>
+          {step === 2 && (
+            <span className="preview-like">
+              <Heart size={23} fill="currentColor" />
+            </span>
+          )}
         </div>
         <div className="floating-note">
           <Repeat2 size={18} />

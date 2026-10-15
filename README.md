@@ -195,3 +195,14 @@ Les images affichées sont optimisées en WebP (portraits de 256 pixels, visuel 
 Les tests tactiles Chromium ne remplacent pas une validation sur Safari/iPhone réel. Le push GitHub déclenche la mise à jour Vercel si le projet est connecté à la branche `main` ; l’état de ce déploiement doit être vérifié dans Vercel.
 
 [Aperçu du guide d’entrée](docs/guide-iphone.png) · [Verso du profil avec photo](docs/verso-iphone.png)
+
+
+### Finitions du guide et des interactions
+
+Le guide est désormais compact : ses trois étapes et le bouton d’entrée tiennent dans le viewport aux dimensions testées de 320 × 568, 390 × 844 et 430 × 932. Le visuel se retourne à l’étape correspondante. Pour ouvrir directement le guide même après l’avoir passé, ajouter `?guide=1` à l’adresse ; ce paramètre est retiré à l’entrée dans l’app.
+
+La découverte accompagne le glissement du doigt, affiche une indication de geste et anime le passage au profil suivant. La sélection de navigation glisse entre les trois onglets. Les animations sont désactivées lorsque la réduction des mouvements est demandée.
+
+Les conversations rappellent le service et proposent des amorces de message : elles remplissent le champ sans envoyer automatiquement. La discussion défile jusqu’au dernier message. Le profil permet de choisir un des portraits fictifs de démonstration, avec sauvegarde locale.
+
+La compilation et dix tests de parcours et de disposition sont utilisés pour valider ces changements. La vérification sur un iPhone/Safari réel reste à effectuer.
