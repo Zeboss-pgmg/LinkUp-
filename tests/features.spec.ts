@@ -165,7 +165,7 @@ test("a provider earns fictional credits once after accepting and completing a d
 
 test('dedicated create-skill entry saves a skill in the profile and supports archiving',async({page})=>{
  await page.setViewportSize({width:320,height:568});
- await page.getByRole('button',{name:'Explorer',exact:true}).click();
+ await page.getByRole('button',{name:'Créer',exact:true}).click();
  await page.getByRole('button',{name:'Créer une compétence',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Créer une compétence.'})).toBeVisible();
  await page.getByLabel('Nom de la compétence').fill('Réparer un vélo');

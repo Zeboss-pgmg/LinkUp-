@@ -20,7 +20,7 @@ const mark = (await fs.readFile("public/icon.svg", "utf8")).replace(
 async function render(file, width, height, svg) {
   await page.setViewportSize({ width, height });
   await page.setContent(
-    `<style>html,body{margin:0;width:100%;height:100%;background:#f4f1e8}svg{display:block;width:100%;height:100%}</style>${svg}`,
+    `<style>html,body{margin:0;width:100%;height:100%;background:#f8f6f7}svg{display:block;width:100%;height:100%}</style>${svg}`,
   );
   await page.screenshot({ path: file });
 }
@@ -38,7 +38,7 @@ const ios = "ios/App/App/Assets.xcassets";
 await render(`${ios}/AppIcon.appiconset/AppIcon-512@2x.png`, 1024, 1024, mark);
 const inner = mark.replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "");
 const splash = (w, h) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="#f4f1e8"/><svg x="${w / 2 - Math.min(w, h) * 0.11}" y="${h / 2 - Math.min(w, h) * 0.11}" width="${Math.min(w, h) * 0.22}" height="${Math.min(w, h) * 0.22}" viewBox="0 0 192 192">${inner}</svg></svg>`;
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}"><rect width="${w}" height="${h}" fill="#f8f6f7"/><svg x="${w / 2 - Math.min(w, h) * 0.11}" y="${h / 2 - Math.min(w, h) * 0.11}" width="${Math.min(w, h) * 0.22}" height="${Math.min(w, h) * 0.22}" viewBox="0 0 192 192">${inner}</svg></svg>`;
 for (const file of await allFiles(ios))
   if (file.includes("Splash.imageset") && file.endsWith(".png"))
     await render(file, 2732, 2732, splash(2732, 2732));

@@ -15,7 +15,6 @@ type Props = {
   onCategory: (name: string) => void;
   onSelect: (id: number) => void;
   onPublish: () => void;
-  onCreateSkill: () => void;
   saved: number[];
   onSave: (id: number) => void;
 };
@@ -25,7 +24,6 @@ export default function Explore({
   onCategory,
   onSelect,
   onPublish,
-  onCreateSkill,
   saved,
   onSave,
 }: Props) {
@@ -78,20 +76,6 @@ export default function Explore({
         </button>
       </div>
       <div className="category-grid">
-        <button
-          className="create-skill-tile"
-          onClick={onCreateSkill}
-          aria-label="Créer une compétence"
-        >
-          <span className="create-skill-icon">
-            <Plus size={25} strokeWidth={1.5} />
-          </span>
-          <span>
-            <strong>Créer une compétence</strong>
-            <small>Ajoute ce que tu sais faire.</small>
-          </span>
-          <ArrowUpRight size={22} />
-        </button>
         {categoryInfo.map((c) => (
           <button
             key={c.name}

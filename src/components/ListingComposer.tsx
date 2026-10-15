@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowUpRight, Check, Repeat2, Coins, ShieldCheck } from "lucide-react";
 import { categoryInfo } from "../data";
 import { emptyListing, type Listing } from "../listings";
@@ -6,14 +6,21 @@ export default function ListingComposer({
   initial,
   onSave,
   asSkill = false,
+  onDraftChange,
+  isDraft = false,
 }: {
   initial: Listing | null;
   asSkill?: boolean;
+  onDraftChange?: (l: Listing) => void;
+  isDraft?: boolean;
   onSave: (l: Listing) => void;
 }) {
   const [value, setValue] = useState<Listing>(
     initial || { ...emptyListing, id: Date.now() },
   );
+  useEffect(() => {
+    onDraftChange?.(value);
+  }, [value, onDraftChange]);
   return (
     <form
       className="listing-composer"
@@ -27,19 +34,26 @@ export default function ListingComposer({
         });
       }}
     >
-      <span className="eyebrow">FAIS TOURNER TON SAVOIR-FAIRE</span>
       <h2>
         {asSkill
           ? "Créer une compétence."
-          : initial
+          : initial && !isDraft
             ? "Modifier ton annonce."
-            : "Créer ton annonce."}
+            : "Créer un post."}
       </h2>
+      {(!initial || isDraft) && (
+        <p className="composer-intro">
+          {asSkill
+            ? "Partage ce que tu sais faire et donne envie d’apprendre avec toi."
+            : "Un savoir-faire à partager ou un coup de main à trouver ? À toi de jouer."}
+        </p>
+      )}
       {!asSkill && (
         <div className="listing-kinds">
           <button
             type="button"
             className={value.kind === "offer" ? "selected" : ""}
+            aria-pressed={value.kind === "offer"}
             onClick={() => setValue({ ...value, kind: "offer" })}
           >
             Je propose un service
@@ -47,6 +61,7 @@ export default function ListingComposer({
           <button
             type="button"
             className={value.kind === "request" ? "selected" : ""}
+            aria-pressed={value.kind === "request"}
             onClick={() => setValue({ ...value, kind: "request" })}
           >
             Je cherche de l’aide
@@ -179,7 +194,7 @@ export default function ListingComposer({
       >
         {asSkill
           ? "Ajouter ma compétence"
-          : initial
+          : initial && !isDraft
             ? "Enregistrer les modifications"
             : "Publier mon annonce fictive"}
         <ArrowUpRight size={18} />

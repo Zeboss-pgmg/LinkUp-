@@ -145,6 +145,8 @@ function App() {
   );
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [skillComposer, setSkillComposer] = useState(false);
+  const [postDraft, setPostDraft] = useState<Listing | null>(null);
+  const [skillDraft, setSkillDraft] = useState<Listing | null>(null);
   const [incomingListing, setIncomingListing] = useState<Listing | null>(null);
   const completedOnce = useRef(new Set<number>());
   const [blocked, setBlocked] = useState<number[]>(() =>
@@ -254,7 +256,7 @@ function App() {
   function publish() {
     setSkillComposer(false);
     setEditingListing(null);
-    setModal("listing");
+    setTab("create");
   }
   function saveListing(listing: Listing) {
     const value = listings.some((l) => l.id === listing.id)
@@ -262,6 +264,10 @@ function App() {
       : [listing, ...listings];
     setListings(value);
     persist("ss-listings", value);
+    if (tab === "create") {
+      if (skillComposer) setSkillDraft(null);
+      else setPostDraft(null);
+    }
     setModal(null);
     setTab("profile");
     notify(
@@ -859,14 +865,37 @@ function App() {
             }}
             onSelect={selectPerson}
             onPublish={publish}
-            onCreateSkill={() => {
-              setSkillComposer(true);
-              setEditingListing(null);
-              setModal("listing");
-            }}
             saved={saved}
             onSave={toggleSaved}
           />
+        )}
+        {!welcome && tab === "create" && (
+          <section className="create-page" aria-label="Création de posts">
+            <div className="creation-types" role="group" aria-label="Type de création">
+              <button
+                aria-label="Créer un post"
+                aria-pressed={!skillComposer}
+                onClick={() => setSkillComposer(false)}
+              >
+                <Plus size={18} /> Un post
+              </button>
+              <button
+                aria-label="Créer une compétence"
+                aria-pressed={skillComposer}
+                onClick={() => setSkillComposer(true)}
+              >
+                <Sparkles size={18} /> Une compétence
+              </button>
+            </div>
+            <ListingComposer
+              key={skillComposer ? "skill" : "post"}
+              initial={skillComposer ? skillDraft : postDraft}
+              asSkill={skillComposer}
+              isDraft
+              onDraftChange={skillComposer ? setSkillDraft : setPostDraft}
+              onSave={saveListing}
+            />
+          </section>
         )}
         {!welcome && tab === "messages" && (
           <section className={`messages-page ${chat ? "chat-open" : ""}`}>
@@ -1192,7 +1221,16 @@ function App() {
           </section>
         )}
       </main>
-      {!welcome && <BottomNav tab={tab} onChange={setTab} inert={!!modal} />}
+      {!welcome && (
+        <BottomNav
+          tab={tab}
+          onChange={(nextTab) => {
+            if (nextTab === "create") setSkillComposer(false);
+            setTab(nextTab);
+          }}
+          inert={!!modal}
+        />
+      )}
       {!welcome && (
         <span className="desktop-footer">SKILLSWAP · UN PEU PLUS HUMAIN.</span>
       )}

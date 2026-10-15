@@ -1,7 +1,8 @@
-import { Compass, Search, MessageCircle, UserRound } from "lucide-react";
+import { Compass, Search, MessageCircle, UserRound, Plus } from "lucide-react";
 const tabs = [
   { id: "discover", label: "Découverte", icon: Compass },
   { id: "explore", label: "Explorer", icon: Search },
+  { id: "create", label: "Créer", icon: Plus },
   { id: "messages", label: "Messages", icon: MessageCircle },
   { id: "profile", label: "Profil", icon: UserRound },
 ];
@@ -17,7 +18,7 @@ export default function BottomNav({
   const index = tabs.findIndex((t) => t.id === tab);
   return (
     <nav
-      className="bottom-nav glass four-tabs"
+      className="bottom-nav glass five-tabs"
       aria-label="Navigation principale"
       inert={inert}
       aria-hidden={inert}

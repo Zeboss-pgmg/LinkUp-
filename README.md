@@ -268,3 +268,16 @@ Passe de finition guidée par [Impeccable](https://github.com/pbakaus/impeccable
 Les vérifications de gestes utilisent des événements tactiles synthétisés dans Chromium, et les captures des viewports émulés. La validation sur un iPhone/Safari réel reste à faire.
 
 [Explorer sur iPhone](docs/explorer-iphone.png) · [Explorer sur ordinateur](docs/explorer-desktop.png)
+
+
+### Espace Créer et nouvelle palette — 15 octobre 2026
+
+La création dispose de son **propre onglet central Créer**, entre Explorer et Messages. Explorer est consacré aux domaines et aux profils : la grande tuile de création a été retirée du catalogue. Dans Créer, deux choix permettent de préparer un post (proposition de service ou demande d’aide) ou d’ajouter une compétence. Le formulaire occupe une page complète ; les boutons de publication existants y conduisent également. Les modifications d’une annonce existante restent accessibles depuis le profil.
+
+Les deux brouillons sont indépendants et conservés en mémoire lorsque l’on change d’onglet ou de type de création. Un rechargement ferme ces brouillons non enregistrés. Après validation, l’annonce est stockée localement et visible dans le profil, avec les possibilités existantes de modification et d’archivage. Il s’agit toujours de posts fictifs, sans diffusion à de vrais utilisateurs.
+
+Le vert et le jaune citron de l’interface sont remplacés par **blanc cassé `#f8f6f7`, encre `#29252d` et rose doux `#edcbd8`**. La navigation, les boutons, les catégories, le logo, les icônes d’installation et les écrans de lancement mobiles suivent cette palette. Les ambiances choisies par les membres restent personnelles. Les polices Bricolage Grotesque et IBM Plex Sans sont conservées.
+
+[Aperçu de l’espace Créer](docs/creer-post-iphone.png)
+
+Validation de cette révision : 19 tests web réussis, parcours de brouillons vérifié séparément après ajout du sélecteur, test de production hors connexion réussi, compilation et synchronisation Capacitor iOS/Android réussies. Les applications natives ne sont pas compilées ni signées dans cet environnement.

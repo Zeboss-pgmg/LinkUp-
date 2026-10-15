@@ -1,5 +1,5 @@
-/* A richer catalogue and a deliberate four-destination navigation. */
-.mode-app .bottom-nav.four-tabs {
+/* A richer catalogue and a deliberate five-destination navigation. */
+.mode-app .bottom-nav.five-tabs {
   width: 358px;
   max-width: calc(100% - 36px);
   border-radius: 28px;
@@ -9,23 +9,23 @@
     0 12px 36px #50364e1c,
     inset 0 1px 0 #fff;
 }
-.mode-app .four-tabs .nav-selection {
-  width: calc((100% - 21px) / 4);
+.mode-app .five-tabs .nav-selection {
+  width: calc((100% - 26px) / 5);
   border-radius: 22px;
 }
-.mode-app .four-tabs button {
+.mode-app .five-tabs button {
   font-size: 8px;
   gap: 5px;
 }
-.mode-app .four-tabs button.active {
+.mode-app .five-tabs button.active {
   color: #543553;
 }
-.mode-app .four-tabs button i {
+.mode-app .five-tabs button i {
   background: var(--deep);
   width: 3px;
   height: 3px;
 }
-.mode-app .four-tabs button:not(.active):hover {
+.mode-app .five-tabs button:not(.active):hover {
   color: #49324d;
 }
 .mode-app .quick-publish {
@@ -744,7 +744,7 @@
   .mode-app .discovery-stage {
     grid-template-rows: 70px 42px minmax(0, 1fr) 82px 20px;
   }
-  .mode-app .bottom-nav.four-tabs {
+  .mode-app .bottom-nav.five-tabs {
     bottom: 22px;
   }
 }
@@ -767,7 +767,7 @@
     font-size: 8px;
     padding: 8px 10px;
   }
-  .mode-app .four-tabs button {
+  .mode-app .five-tabs button {
     font-size: 7px;
   }
   .category-tile {
@@ -825,10 +825,10 @@
     padding: 6px 10px;
     font-size: 8px;
   }
-  .mode-app .bottom-nav.four-tabs {
+  .mode-app .bottom-nav.five-tabs {
     bottom: 10px;
   }
-  .mode-app .four-tabs .nav-selection {
+  .mode-app .five-tabs .nav-selection {
     height: 46px;
   }
   .mode-app .card-content h2 {
