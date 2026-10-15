@@ -281,3 +281,16 @@ Le vert et le jaune citron de l’interface sont remplacés par **blanc cassé `
 [Aperçu de l’espace Créer](docs/creer-post-iphone.png)
 
 Validation de cette révision : 19 tests web réussis, parcours de brouillons vérifié séparément après ajout du sélecteur, test de production hors connexion réussi, compilation et synchronisation Capacitor iOS/Android réussies. Les applications natives ne sont pas compilées ni signées dans cet environnement.
+
+
+### Talents et photos de démonstration — 15 octobre 2026
+
+Le catalogue contient maintenant **14 services et 7 personnages fictifs**. Six photographies originales générées montrent les talents en action : Noah et la photo au smartphone (ambiance sauge), Inès et la céramique (argile/pêche), Adam et la guitare (lilas), Mila et la couture upcyclée (rose), Sami et les pâtes fraîches (tons chauds), Jade et le graphisme (lilas et affiches abstraites). Léa et son univers nail art sont conservés. Sami reprend la proposition de cuisine de la démonstration ; Mila et Jade ajoutent deux propositions au catalogue.
+
+Les nouveaux visuels sont associés aux photos de profil des mêmes personnages. Leur cadrage rond utilise un composant de présentation, sans modifier le contenu des images. Les photographies de service sont livrées en WebP de 900 × 1200 pixels, environ 92 à 117 Ko chacune ; les variantes utilisées pour les portraits sont plus petites. Aucun appel à un service d’images externe n’est nécessaire au chargement de l’app. Les fichiers de génération haute définition restent dans l’environnement de création, hors Git.
+
+Chaque carte du catalogue affiche aussi le besoin en échange. Les six profils illustrés précisent un résultat concret dans « Tu repars avec » : photos, bol, morceau, tote bag, recette ou affiche. Par exemple, Mila propose la couture et recherche une initiation photo ; Jade propose une affiche et souhaite découvrir la céramique. Les intérêts, conversations et réservations restent simulés. Ces exemples ne constituent ni des témoignages, ni des preuves d’utilisation réelle ; aucun avis, volume de clientèle ou résultat commercial n’est inventé.
+
+Validation : 19 tests web et un test hors connexion réussis ; compilation et synchronisation Capacitor réussies. La recherche des nouveaux profils et le parcours intérêt/message avec Mila ont aussi été vérifiés dans Chromium. Une vérification ciblée de quatre tests couvre les portraits, images, petits écrans et gestes après intégration du cadrage des avatars.
+
+[Aperçu de Mila](docs/talent-mila-iphone.png) · [Jade et son affiche](docs/talent-jade-iphone.png) · [Sami en cuisine](docs/talent-sami-iphone.png) · [Catalogue sur ordinateur](docs/talents-catalogue-desktop.png)

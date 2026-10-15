@@ -1051,3 +1051,60 @@ textarea {
   border-color: var(--rule);
   background: #edcbd859;
 }
+
+/* A concrete outcome and a reciprocal need make every demo talent useful. */
+.profile-outcome {
+  display: grid;
+  gap: 7px;
+  padding-block: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.profile-outcome strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.talent-copy .talent-exchange {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  border-top: 1px solid var(--rule);
+  padding-top: 11px;
+  margin-top: 12px;
+  color: var(--muted-ink);
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: left;
+}
+.talent-exchange svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.talent-cover > img {
+  object-position: center 30%;
+}
+.talent-avatar {
+  display: inline-block;
+  overflow: hidden;
+  border-radius: 50%;
+  flex-shrink: 0;
+  vertical-align: middle;
+  background: var(--paper);
+}
+.app .talent-avatar > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: center top;
+}
+.app .talent-avatar > .scene-portrait {
+  transform: scale(2);
+  transform-origin: 50% 22%;
+}

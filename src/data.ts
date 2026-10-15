@@ -10,6 +10,7 @@ export type Person = {
   looking: string;
   duration: string;
   cost: number;
+  takeaway?: string;
 };
 export const people: Person[] = [
   {
@@ -31,12 +32,13 @@ export const people: Person[] = [
     name: "Noah",
     skill: "Photo au smartphone.",
     category: "Photo & vidéo",
-    image: "./images/camera.svg",
+    image: "./images/talent-noah.webp",
     avatar: "./images/noah.webp",
     theme: "sage",
     description:
       "Lumière, cadrage, petits moments : je te partage mes astuces pour faire de belles photos avec ton téléphone. On apprend en créant ensemble.",
     looking: "Pratiquer mon anglais à l’oral",
+    takeaway: "Une mini-série de trois photos et des astuces pour cadrer avec ton téléphone.",
     duration: "1 h",
     cost: 1,
   },
@@ -45,12 +47,13 @@ export const people: Person[] = [
     name: "Inès",
     skill: "Premiers pas en céramique.",
     category: "Art & artisanat",
-    image: "./images/pottery.svg",
+    image: "./images/talent-ines.webp",
     avatar: "./images/ines.webp",
     theme: "peach",
     description:
       "Une première découverte de la céramique, sans pression. On imagine une forme et on apprend les gestes de base pour la façonner.",
     looking: "De l’aide pour créer mon portfolio",
+    takeaway: "Un petit bol façonné ensemble et les bases du modelage. La cuisson se prépare avec l’atelier.",
     duration: "2 h",
     cost: 2,
   },
@@ -59,12 +62,13 @@ export const people: Person[] = [
     name: "Adam",
     skill: "Débuter la guitare.",
     category: "Musique",
-    image: "./images/guitar.svg",
+    image: "./images/talent-adam.webp",
     avatar: "./images/adam.webp",
     theme: "lavender",
     description:
       "Tu veux commencer la guitare ? Je te montre quelques accords et on joue ton premier morceau à ton rythme.",
     looking: "Des conseils en dessin",
+    takeaway: "Trois accords, un rythme simple et ton premier morceau à travailler.",
     duration: "1 h",
     cost: 1,
   },
@@ -84,7 +88,7 @@ export const categoryInfo = [
     short: "Photo & vidéo",
     icon: "camera",
     color: "sage",
-    cover: "./images/camera.svg",
+    cover: "./images/talent-noah.webp",
     description: "Du premier cliché au montage final.",
   },
   {
@@ -92,7 +96,7 @@ export const categoryInfo = [
     short: "Artisanat",
     icon: "palette",
     color: "peach",
-    cover: "./images/pottery.svg",
+    cover: "./images/talent-ines.webp",
     description: "Dessiner, fabriquer, imaginer.",
   },
   {
@@ -100,7 +104,7 @@ export const categoryInfo = [
     short: "Musique",
     icon: "music",
     color: "lavender",
-    cover: "./images/guitar.svg",
+    cover: "./images/talent-adam.webp",
     description: "Un instrument, un morceau, à ton rythme.",
   },
   {
@@ -124,7 +128,7 @@ export const categoryInfo = [
     short: "Cuisine",
     icon: "chef",
     color: "peach",
-    cover: "./images/cooking.svg",
+    cover: "./images/talent-sami.webp",
     description: "Des recettes à partager et à refaire.",
   },
   {
@@ -169,11 +173,12 @@ const more: Omit<Person, "avatar" | "name">[] = [
     id: 7,
     skill: "Les pâtes, faites maison.",
     category: "Cuisine",
-    image: "./images/cooking.svg",
+    image: "./images/talent-sami.webp",
     theme: "peach",
     description:
       "Farine, eau, un peu de patience : je te montre une recette simple à refaire. On vérifie ensemble les ingrédients et les éventuelles allergies avant tout atelier.",
     looking: "Une initiation à la guitare",
+    takeaway: "Des tagliatelles fraîches et une recette à refaire. On vérifie les allergies avant de commencer.",
     duration: "2 h",
     cost: 2,
   },
@@ -240,10 +245,46 @@ const more: Omit<Person, "avatar" | "name">[] = [
 ];
 // Each fictional member may offer several services. Existing IDs remain stable.
 for (const [i, p] of more.entries()) {
+  if (p.id === 7) {
+    people.push({ ...p, name: "Sami", avatar: "./images/sami.webp" });
+    continue;
+  }
   const member = people[i % 4];
   people.push({ ...p, name: member.name, avatar: member.avatar });
 }
-export const demoMembers = people.slice(0, 4);
+people.push(
+  {
+    id: 13,
+    name: "Mila",
+    skill: "Ton premier tote bag upcyclé.",
+    category: "Art & artisanat",
+    image: "./images/talent-mila.webp",
+    avatar: "./images/mila.webp",
+    theme: "rose",
+    description: "Un vieux tissu peut devenir ton prochain sac préféré. Je te montre comment préparer un patron simple, prendre en main une machine et assembler ton tote bag. On commence avec des chutes, sans pression.",
+    looking: "Apprendre à photographier mes créations avec Noah",
+    takeaway: "Un tote bag cousu à partir de tissu récupéré et les gestes pour recommencer chez toi.",
+    duration: "2 h",
+    cost: 2,
+  },
+  {
+    id: 14,
+    name: "Jade",
+    skill: "Une affiche qui a du caractère.",
+    category: "Numérique",
+    image: "./images/talent-jade.webp",
+    avatar: "./images/jade.webp",
+    theme: "lavender",
+    description: "Tu as une idée de projet mais tu ne sais pas comment lui donner une forme ? On explore les couleurs, la composition et la typographie, puis on construit une affiche avec des outils gratuits et nos propres éléments graphiques.",
+    looking: "Découvrir la céramique avec Inès",
+    takeaway: "Une affiche de démonstration et une petite palette graphique pour ton projet.",
+    duration: "1 h 30",
+    cost: 2,
+  },
+);
+export const demoMembers = people.filter(
+  (person, index) => people.findIndex((p) => p.name === person.name) === index,
+);
 export function normalize(text: string) {
   return text
     .normalize("NFD")

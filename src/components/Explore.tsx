@@ -6,9 +6,11 @@ import {
   Plus,
   Bookmark,
   SlidersHorizontal,
+  Repeat2,
 } from "lucide-react";
 import { categoryInfo, normalize, type Person } from "../data";
 import CategoryIcon from "./CategoryIcon";
+import TalentAvatar from "./TalentAvatar";
 type Props = {
   people: Person[];
   category: string;
@@ -140,10 +142,14 @@ export default function Explore({
                 <span>{p.category}</span>
                 <h3>{p.skill}</h3>
                 <div>
-                  <img src={p.avatar} alt="" />
+                  <TalentAvatar src={p.avatar} size={24} />
                   <span>{p.name}</span>
                   <ArrowUpRight size={15} />
                 </div>
+                <p className="talent-exchange">
+                  <Repeat2 size={13} aria-hidden="true" />
+                  <span>En échange : {p.looking}</span>
+                </p>
               </div>
             </button>
             <button

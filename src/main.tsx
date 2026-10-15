@@ -51,6 +51,7 @@ import {
 } from "./data";
 import Explore from "./components/Explore";
 import ListingComposer from "./components/ListingComposer";
+import TalentAvatar from "./components/TalentAvatar";
 import Library from "./components/Library";
 import BottomNav from "./components/BottomNav";
 import { type Listing } from "./listings";
@@ -728,10 +729,7 @@ function App() {
                           </span>
                           <h2>{person.skill}</h2>
                           <div className="person-row">
-                            <img
-                              src={person.avatar}
-                              alt="Portrait illustratif"
-                            />
+                            <TalentAvatar src={person.avatar} />
                             <div>
                               <strong>{person.name}</strong>
                               <span>
@@ -750,7 +748,7 @@ function App() {
                         inert={!flipped}
                       >
                         <div className="back-heading">
-                          <img src={person.avatar} alt="" />
+                          <TalentAvatar src={person.avatar} size={48} />
                           <div>
                             <span>LE PROFIL</span>
                             <h2>{person.name}</h2>
@@ -781,6 +779,12 @@ function App() {
                           Échange direct ou points LinkUp : à vous de choisir
                           ensemble.
                         </p>
+                        {person.takeaway && (
+                          <p className="profile-outcome">
+                            <strong>Tu repars avec</strong>
+                            <span>{person.takeaway}</span>
+                          </p>
+                        )}
                         <span className="back-hint">
                           ← Glisse pour retrouver la photo
                         </span>
