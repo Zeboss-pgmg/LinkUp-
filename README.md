@@ -252,6 +252,19 @@ Validation de cette révision : quinze tests de parcours web réussis, un test d
 
 L’interface partagée adopte une palette stable : papier `#f4f1e8`, vert encre `#193d32` et citron `#ddf879`. Les titres utilisent Bricolage Grotesque et les textes IBM Plex Sans, inclus localement via Fontsource. Le monogramme, les icônes d’installation et les ressources natives suivent cette identité. Les ambiances personnelles des profils restent personnalisables et continuent d’accompagner leurs photos.
 
-Explorer présente des domaines numérotés, sans les anciens halos et cercles décoratifs. Sa première entrée, **Créer une compétence**, ouvre un formulaire dédié à une offre de savoir-faire. La compétence est enregistrée comme annonce fictive et apparaît dans les compétences du profil tant qu’elle est active ; elle peut être modifiée ou archivée avec les autres annonces. Aucune publication à de vrais utilisateurs n’a lieu.
+Explorer présente un catalogue de domaines, sans les anciens halos et cercles décoratifs. Sa première entrée, **Créer une compétence**, ouvre un formulaire dédié à une offre de savoir-faire. La compétence est enregistrée comme annonce fictive et apparaît dans les compétences du profil tant qu’elle est active ; elle peut être modifiée ou archivée avec les autres annonces. Aucune publication à de vrais utilisateurs n’a lieu.
 
 Les licences des deux polices sont également distribuées dans `public/licenses/`. Validation de cette révision : seize tests de parcours web et un test hors connexion réussis ; build et synchronisation des projets mobiles réussis.
+
+
+### Défilement et passe Impeccable — 15 octobre 2026
+
+La découverte accepte désormais le glissement vers le haut **ou vers le bas** pour avancer. La molette et le trackpad changent de profil, dans les deux sens ; une rafale et son inertie ne doivent déclencher qu’un changement. Les gestes horizontaux de retournement sont conservés. Si les informations du verso dépassent sur un petit écran, un glissement vers le haut les fait défiler ; une fois revenu en haut, le glissement vers le bas passe au profil suivant.
+
+Explorer et Profil défilent dans leur zone de contenu, avec une navigation fixe. Chaque changement d’onglet démarre en haut de sa page. Les tests vérifient aussi le défilement après fermeture d’une fenêtre et le glissement à travers les boutons des catégories sans les activer.
+
+Passe de finition guidée par [Impeccable](https://github.com/pbakaus/impeccable) (skill 4.6.0, références Adapt/Polish et Craft floor ; moteur 0.1.15, commandes context/detect). L’identité papier/encre/citron et les polices existantes sont conservées. Les numéros décoratifs et surtitres de la découverte et du catalogue sont retirés ; les favoris ont une zone tactile agrandie. Sur ordinateur, le catalogue occupe davantage de largeur, avec quatre colonnes. Aucun outil Impeccable ne s’exécute dans l’application livrée.
+
+Les vérifications de gestes utilisent des événements tactiles synthétisés dans Chromium, et les captures des viewports émulés. La validation sur un iPhone/Safari réel reste à faire.
+
+[Explorer sur iPhone](docs/explorer-iphone.png) · [Explorer sur ordinateur](docs/explorer-desktop.png)

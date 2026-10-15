@@ -123,9 +123,12 @@ function App() {
   const [verticalDrag, setVerticalDrag] = useState(0);
   const [leaving, setLeaving] = useState(false);
   const transition = useRef(false);
+  const mainElement = useRef<HTMLElement>(null);
+  const wheelGesture = useRef({ delta: 0, lastEvent: 0, lastStep: 0, locked: false });
   const nextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const direction = useRef<"turn" | "next" | null>(null);
+  const direction = useRef<"turn" | "next" | "scroll" | null>(null);
   const cardElement = useRef<HTMLDivElement>(null);
+  const backElement = useRef<HTMLElement>(null);
   const restoreCardFocus = useRef(false);
   const chatScroll = useRef<HTMLDivElement>(null);
   const composerInput = useRef<HTMLInputElement>(null);
@@ -219,7 +222,7 @@ function App() {
       previous?.focus();
     };
   }, [modal]);
-  const start = useRef({ x: 0, y: 0 });
+  const start = useRef({ x: 0, y: 0, scrollTop: 0 });
   const moved = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const filtered = people.filter(
@@ -338,7 +341,7 @@ function App() {
     setVerticalDrag(0);
     setTab("discover");
   }
-  function next() {
+  function next(step = 1) {
     if (transition.current) return;
     transition.current = true;
     setLeaving(true);
@@ -346,7 +349,7 @@ function App() {
       ? 0
       : 170;
     nextTimer.current = setTimeout(() => {
-      setIndex((i) => i + 1);
+      setIndex((i) => (i + step + filtered.length) % Math.max(filtered.length, 1));
       setFlipped(false);
       setDrag(0);
       setVerticalDrag(0);
@@ -354,6 +357,44 @@ function App() {
       transition.current = false;
     }, delay);
   }
+  // A wheel burst is one card change, including a trackpad's momentum events.
+  // Use a non-passive listener only on this gesture surface, never on the feed.
+  useEffect(() => {
+    const main = mainElement.current;
+    if (!main || welcome || tab !== "discover" || modal) return;
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      if ((event.target as HTMLElement).closest(".category-rail")) return;
+      const back = (event.target as HTMLElement).closest<HTMLElement>(
+        ".card-back",
+      );
+      if (back && flipped && back.scrollHeight > back.clientHeight + 1) return;
+      event.preventDefault();
+      const now = performance.now();
+      const gesture = wheelGesture.current;
+      if (now - gesture.lastEvent > 180 && now - gesture.lastStep > 500) {
+        gesture.delta = 0;
+        gesture.locked = false;
+      }
+      gesture.lastEvent = now;
+      if (gesture.locked || transition.current) return;
+      const unit = event.deltaMode === 1
+        ? 16
+        : event.deltaMode === 2 ? main.clientHeight : 1;
+      gesture.delta += event.deltaY * unit;
+      if (Math.abs(gesture.delta) >= 45) {
+        gesture.locked = true;
+        gesture.lastStep = now;
+        next(gesture.delta > 0 ? 1 : -1);
+      }
+    };
+    main.addEventListener("wheel", onWheel, { passive: false });
+    return () => main.removeEventListener("wheel", onWheel);
+  });
+  useEffect(() => {
+    mainElement.current?.scrollTo({ top: 0, behavior: "instant" });
+    wheelGesture.current = { delta: 0, lastEvent: 0, lastStep: 0, locked: false };
+  }, [tab, welcome]);
   function like(p: Person) {
     if (likes.includes(p.id)) {
       notify("Ta demande est déjà envoyée. Tu peux lui écrire.");
@@ -442,7 +483,11 @@ function App() {
     if (transition.current || (e.target as HTMLElement).closest("button"))
       return;
     direction.current = null;
-    start.current = { x: e.clientX, y: e.clientY };
+    start.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollTop: backElement.current?.scrollTop || 0,
+    };
     moved.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
   }
@@ -451,13 +496,20 @@ function App() {
     const dx = e.clientX - start.current.x,
       dy = e.clientY - start.current.y;
     if (!direction.current && Math.max(Math.abs(dx), Math.abs(dy)) > 10) {
-      direction.current =
-        Math.abs(dx) > Math.abs(dy) * 0.55 ? "turn" : dy > 0 ? "next" : null;
+      const back = backElement.current;
+      const scrollingInfo = flipped && back &&
+        back.scrollHeight > back.clientHeight + 1 &&
+        (dy < 0 || start.current.scrollTop > 0);
+      direction.current = Math.abs(dx) > Math.abs(dy) * 0.55
+        ? "turn"
+        : scrollingInfo ? "scroll" : "next";
     }
     if (direction.current === "turn")
       setDrag(Math.max(-55, Math.min(55, dx / 3)));
+    if (direction.current === "scroll" && backElement.current)
+      backElement.current.scrollTop = start.current.scrollTop - dy;
     if (direction.current === "next")
-      setVerticalDrag(Math.max(0, Math.min(110, dy * 0.55)));
+      setVerticalDrag(Math.max(-110, Math.min(110, dy * 0.55)));
   }
 
   function onPointerUp(e: React.PointerEvent) {
@@ -465,9 +517,12 @@ function App() {
     moved.current = false;
     const dx = e.clientX - start.current.x,
       dy = e.clientY - start.current.y;
-    if ((!flipped && dx > 55) || (flipped && dx < -55)) {
+    if (direction.current === "turn" && ((!flipped && dx > 55) || (flipped && dx < -55))) {
       setFlipped(!flipped);
-    } else if (dy > 65 && dy > Math.abs(dx)) {
+    } else if (
+      direction.current !== "scroll" &&
+      Math.abs(dy) > 65 && Math.abs(dy) > Math.abs(dx)
+    ) {
       next();
     }
     setDrag(0);
@@ -520,14 +575,13 @@ function App() {
           </button>
         </div>
       </header>
-      <main inert={!!modal} aria-hidden={!!modal}>
+      <main ref={mainElement} inert={!!modal} aria-hidden={!!modal}>
         {welcome && <Welcome onEnter={enterApp} />}
         {!welcome && tab === "discover" && (
           <section className="discover">
             <div className="discovery-stage">
               <div className="stage-top">
                 <div className="discovery-heading">
-                  <span className="eyebrow">POUR TOI</span>
                   <h1>
                     Découvrir<span>.</span>
                   </h1>
@@ -579,9 +633,9 @@ function App() {
                     key={person.id}
                     className={`card-perspective ${leaving ? "is-leaving" : ""}`}
                   >
-                    {(verticalDrag > 12 || Math.abs(drag) > 8) && (
+                    {(Math.abs(verticalDrag) > 12 || Math.abs(drag) > 8) && (
                       <div className="gesture-cue" aria-hidden="true">
-                        {verticalDrag > 12 ? (
+                        {Math.abs(verticalDrag) > 12 ? (
                           <>
                             <ArrowDown size={17} />
                             Profil suivant
@@ -596,7 +650,7 @@ function App() {
                     )}
                     <div
                       ref={cardElement}
-                      className="profile-card"
+                      className={`profile-card ${flipped ? "is-flipped" : ""}`}
                       tabIndex={0}
                       role="group"
                       aria-label={`Profil de ${person.name}. Flèche droite pour retourner, flèche bas pour le profil suivant.`}
@@ -685,6 +739,7 @@ function App() {
                         </div>
                       </article>
                       <article
+                        ref={backElement}
                         className="card-face card-back glass"
                         inert={!flipped}
                       >
@@ -729,7 +784,7 @@ function App() {
                   <div className="card-actions">
                     <button
                       className="round skip"
-                      onClick={next}
+                      onClick={() => next()}
                       aria-label="Profil suivant"
                     >
                       <X size={23} />
@@ -760,7 +815,8 @@ function App() {
                   <div className="gesture-hint">
                     <span>→ Retourne la carte</span>
                     <span className="hint-dot" />
-                    <span>↓ Prochain profil</span>
+                    <span className="touch-scroll-hint">Glisse · profil suivant</span>
+                    <span className="wheel-scroll-hint">Molette · changer de profil</span>
                   </div>
                 </>
               ) : (

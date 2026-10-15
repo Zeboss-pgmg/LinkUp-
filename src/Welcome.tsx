@@ -13,7 +13,7 @@ const steps = [
   {
     number: "01",
     title: "Trouve ton prochain déclic.",
-    text: "Glisse vers le bas pour découvrir un autre profil.",
+    text: "Glisse vers le haut ou le bas. Sur ordinateur, utilise la molette.",
     icon: ArrowDown,
   },
   {

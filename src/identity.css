@@ -240,20 +240,15 @@ h3 {
   width: 21px;
   height: 21px;
 }
-/* Explorer: indexed pieces of a catalogue, with one purposeful creation tile. */
+/* Explorer: a skills catalogue, with one purposeful creation tile. */
 .explore-page {
   padding-top: 5px;
-}
-.page-heading .eyebrow {
-  font-size: 8px;
-  letter-spacing: 1.3px;
-  color: var(--muted-ink);
 }
 .page-heading h1 {
   font-family: var(--font-display);
   font-size: 43px;
   line-height: 1.05;
-  letter-spacing: -2px;
+  letter-spacing: -0.04em;
   margin-top: 10px;
   font-weight: 700;
   color: var(--ink);
@@ -287,16 +282,9 @@ h3 {
   font-weight: 600;
   letter-spacing: -0.6px;
 }
-.section-number {
-  font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 9px;
-  letter-spacing: 0;
-  color: #73816b;
-  font-weight: 400;
-  margin-left: 4px;
-}
 .saved-filter {
   font-size: 10px;
+  min-height: 44px;
   color: #425c4c;
   border-color: var(--rule);
   background: transparent;
@@ -357,13 +345,7 @@ h3 {
   top: 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-.category-tile-top > span {
-  font-family: ui-monospace, SFMono-Regular, monospace;
-  font-size: 9px;
-  letter-spacing: 0.4px;
-  opacity: 0.65;
+  justify-content: flex-end;
 }
 .category-tile-top > svg {
   opacity: 0.8;
@@ -994,5 +976,65 @@ h3 {
   }
   .guide-content h2 {
     font-size: 13px;
+  }
+}
+
+/* Let content pages pan natively; card gestures stay local to Discovery. */
+.mode-app > main {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-color: #8a9b7b transparent;
+}
+.mode-app:not(.page-discover) > main {
+  touch-action: pan-y pinch-zoom;
+}
+.mode-app .card-back {
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #8a9b7b transparent;
+}
+::selection {
+  color: #193d32;
+  background: #ddf879;
+}
+input,
+textarea {
+  caret-color: var(--ink);
+}
+.wheel-scroll-hint {
+  display: none;
+}
+@media (pointer: fine) {
+  .touch-scroll-hint {
+    display: none;
+  }
+  .wheel-scroll-hint {
+    display: inline;
+  }
+}
+@media (min-width: 800px) {
+  .page-explore .topbar,
+  .explore-page {
+    max-width: 960px;
+  }
+  .explore-page {
+    padding: 24px 28px 36px;
+  }
+  .page-explore .topbar {
+    padding-inline: 28px;
+  }
+  .explore-search {
+    max-width: 560px;
+  }
+  .category-grid,
+  .talent-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .category-tile {
+    min-height: 150px;
+  }
+  .create-skill-tile {
+    min-height: 84px;
   }
 }

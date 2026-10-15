@@ -42,7 +42,6 @@ export default function Explore({
   return (
     <section className="explore-page">
       <div className="page-heading">
-        <span className="eyebrow">LE COIN DES SAVOIR-FAIRE</span>
         <h1>
           Ça s’apprend<span>.</span>
         </h1>
@@ -68,9 +67,7 @@ export default function Explore({
         )}
       </div>
       <div className="explore-heading">
-        <h2>
-          Les domaines<span className="section-number"> / 08</span>
-        </h2>
+        <h2>Les domaines</h2>
         <button
           className={onlySaved ? "saved-filter active" : "saved-filter"}
           onClick={() => setOnlySaved(!onlySaved)}
@@ -95,7 +92,7 @@ export default function Explore({
           </span>
           <ArrowUpRight size={22} />
         </button>
-        {categoryInfo.map((c, i) => (
+        {categoryInfo.map((c) => (
           <button
             key={c.name}
             className={`category-tile theme-${c.color} ${category === c.name ? "selected" : ""}`}
@@ -106,7 +103,6 @@ export default function Explore({
             aria-pressed={category === c.name}
           >
             <div className="category-tile-top">
-              <span>{String(i + 1).padStart(2, "0")}</span>
               <ArrowUpRight size={15} />
             </div>
             <div className="category-symbol">
