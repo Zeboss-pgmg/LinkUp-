@@ -1,4 +1,9 @@
 import { test, expect } from "@playwright/test";
+test.beforeEach(async ({ page }) => {
+  await page.goto("/");
+  const enter = page.getByRole("button", { name: "Accéder à l’appli" });
+  if (await enter.isVisible()) await enter.click();
+});
 test("discovery gestures, interest, conversation and reservation lifecycle", async ({
   page,
 }) => {
@@ -6,7 +11,7 @@ test("discovery gestures, interest, conversation and reservation lifecycle", asy
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Des ongles, une signature." }),
+    page.getByRole("heading", { name: "Nail art & manucure." }),
   ).toBeVisible();
   const card = page.getByRole("group");
   const box = (await card.boundingBox())!;
@@ -14,7 +19,7 @@ test("discovery gestures, interest, conversation and reservation lifecycle", asy
   await page.mouse.down();
   await page.mouse.move(box.x + 170, box.y + 110, { steps: 8 });
   await page.mouse.up();
-  await expect(page.getByText("Moi, c’est")).toBeVisible();
+  await expect(page.locator(".card-back h2")).toHaveText("Léa");
   await card.focus();
   await page.keyboard.press("ArrowLeft");
   await page.getByRole("button", { name: "Ça m’intéresse" }).click();
@@ -58,7 +63,7 @@ test("themes, filters, downward gesture and mobile layout", async ({
     .getByRole("button", { name: "Photo & vidéo", exact: true })
     .click();
   await expect(
-    page.getByRole("heading", { name: "Ton regard. En images." }),
+    page.getByRole("heading", { name: "Photo au smartphone." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Filtrer les profils" }).click();
   await page
@@ -70,7 +75,7 @@ test("themes, filters, downward gesture and mobile layout", async ({
   await page.mouse.move(b.x + 130, b.y + 190, { steps: 8 });
   await page.mouse.up();
   await expect(
-    page.getByRole("heading", { name: "Ton regard. En images." }),
+    page.getByRole("heading", { name: "Photo au smartphone." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Profil", exact: true }).click();
   await page.getByRole("button", { name: "Mon ambiance" }).click();
@@ -123,6 +128,114 @@ test("profile edits persist and simulated blocking removes a profile", async ({
   await page.getByRole("button", { name: "Signaler ou bloquer" }).click();
   await page.getByRole("button", { name: "Bloquer ce profil" }).click();
   await expect(
-    page.getByRole("heading", { name: "Des ongles, une signature." }),
+    page.getByRole("heading", { name: "Nail art & manucure." }),
   ).toHaveCount(0);
+});
+
+test("welcome guide, explicit entry and replay from profile", async ({
+  page,
+}) => {
+  await page.evaluate(() => localStorage.removeItem("ss-onboarded-v2"));
+  await page.reload();
+  await expect(
+    page.getByRole("region", { name: "Bienvenue et guide de SkillSwap" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Navigation principale" }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Étape suivante du guide" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Passe de l’autre côté." }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Étape suivante du guide" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Un intérêt. Un bonjour." }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/guide-iphone.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Accéder à l’appli" }).click();
+  await expect(page.getByRole("heading", { name: "Découvrir." })).toBeVisible();
+  await expect(page.locator(".welcome")).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Découvrir." })).toBeVisible();
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await page.getByRole("button", { name: "Revoir le petit guide" }).click();
+  await expect(
+    page.getByRole("button", { name: "Accéder à l’appli" }),
+  ).toBeVisible();
+});
+test("application controls fit the viewport on small and modern iPhones", async ({
+  page,
+}) => {
+  for (const size of [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 430, height: 932 },
+  ]) {
+    await page.setViewportSize(size);
+    const card = await page.locator(".profile-card").boundingBox();
+    const actions = await page.locator(".card-actions").boundingBox();
+    const nav = await page
+      .getByRole("navigation", { name: "Navigation principale" })
+      .boundingBox();
+    expect(card!.height).toBeGreaterThan(200);
+    expect(actions!.y + actions!.height).toBeLessThanOrEqual(nav!.y);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollHeight),
+    ).toBeLessThanOrEqual(size.height);
+    await page.getByRole("group").focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(".back-heading img")).toHaveAttribute(
+      "src",
+      "./images/lea.webp",
+    );
+    await page.keyboard.press("ArrowLeft");
+  }
+});
+
+test("real touch events flip and advance the card without scrolling the app", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  const page = await context.newPage();
+  await page.goto("/");
+  await page.getByRole("button", { name: "Accéder à l’appli" }).tap();
+  const client = await context.newCDPSession(page);
+  const b = (await page.getByRole("group").boundingBox())!;
+  async function swipe(x: number, y: number, endX: number, endY: number) {
+    await client.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y }],
+    });
+    for (let i = 1; i <= 8; i++)
+      await client.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [
+          { x: x + ((endX - x) * i) / 8, y: y + ((endY - y) * i) / 8 },
+        ],
+      });
+    await client.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+  }
+  await swipe(b.x + 60, b.y + 150, b.x + 180, b.y + 90);
+  await expect(page.locator(".profile-card")).toHaveCSS(
+    "transform",
+    /matrix3d/,
+  );
+  await expect(page.locator(".card-back")).not.toHaveAttribute("inert", "");
+  await page.waitForTimeout(650);
+  await swipe(b.x + 180, b.y + 100, b.x + 180, b.y + 210);
+  await expect(
+    page.getByRole("heading", { name: "Photo au smartphone." }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await context.close();
 });

@@ -27,12 +27,14 @@ import {
   Palette,
   MapPin,
 } from "lucide-react";
-import "@fontsource/dm-sans/400.css";
-import "@fontsource/dm-sans/500.css";
-import "@fontsource/dm-sans/600.css";
-import "@fontsource/instrument-serif/400.css";
-import "@fontsource/instrument-serif/400-italic.css";
+import "@fontsource/manrope/latin-400.css";
+import "@fontsource/manrope/latin-500.css";
+import "@fontsource/manrope/latin-600.css";
+import "@fontsource/space-grotesk/latin-500.css";
+import "@fontsource/space-grotesk/latin-600.css";
+import Welcome from "./Welcome";
 import "./style.css";
+import "./experience.css";
 
 type Person = {
   id: number;
@@ -51,10 +53,10 @@ const people: Person[] = [
   {
     id: 1,
     name: "Léa",
-    skill: "Des ongles, une signature.",
+    skill: "Nail art & manucure.",
     category: "Beauté & création",
-    image: "./images/nails.png",
-    avatar: "./images/lea.svg",
+    image: "./images/nails.webp",
+    avatar: "./images/lea.webp",
     theme: "rose",
     description:
       "J’adore transformer une idée en petits détails colorés. Je te propose une initiation au nail art : préparation, motifs et création de ton propre style.",
@@ -65,10 +67,10 @@ const people: Person[] = [
   {
     id: 2,
     name: "Noah",
-    skill: "Ton regard. En images.",
+    skill: "Photo au smartphone.",
     category: "Photo & vidéo",
     image: "./images/camera.svg",
-    avatar: "./images/noah.svg",
+    avatar: "./images/noah.webp",
     theme: "sage",
     description:
       "Lumière, cadrage, petits moments : je te partage mes astuces pour faire de belles photos avec ton téléphone. On apprend en créant ensemble.",
@@ -79,10 +81,10 @@ const people: Person[] = [
   {
     id: 3,
     name: "Inès",
-    skill: "Un peu de terre. Beaucoup d’idées.",
+    skill: "Premiers pas en céramique.",
     category: "Art & artisanat",
     image: "./images/pottery.svg",
-    avatar: "./images/ines.svg",
+    avatar: "./images/ines.webp",
     theme: "peach",
     description:
       "Une première découverte de la céramique, sans pression. On imagine une forme et on apprend les gestes de base pour la façonner.",
@@ -93,10 +95,10 @@ const people: Person[] = [
   {
     id: 4,
     name: "Adam",
-    skill: "Les bonnes notes, ensemble.",
+    skill: "Débuter la guitare.",
     category: "Musique",
     image: "./images/guitar.svg",
-    avatar: "./images/noah.svg",
+    avatar: "./images/adam.webp",
     theme: "lavender",
     description:
       "Tu veux commencer la guitare ? Je te montre quelques accords et on joue ton premier morceau à ton rythme.",
@@ -128,6 +130,33 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 function App() {
+  const [welcome, setWelcome] = useState(() => !read("ss-onboarded-v2", false));
+  function enterApp() {
+    setWelcome(false);
+    try {
+      localStorage.setItem("ss-onboarded-v2", "true");
+    } catch {
+      /* Session remains usable. */
+    }
+    window.scrollTo(0, 0);
+  }
+
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const resize = () => {
+      if (viewport.scale !== 1) return;
+      document.documentElement.style.setProperty(
+        "--app-height",
+        `${viewport.height}px`,
+      );
+      setKeyboardOpen(window.innerHeight - viewport.height > 150);
+    };
+    resize();
+    viewport.addEventListener("resize", resize);
+    return () => viewport.removeEventListener("resize", resize);
+  }, []);
   const [tab, setTab] = useState("discover");
   const [category, setCategory] = useState("Tout explorer");
   const [index, setIndex] = useState(0);
@@ -324,19 +353,24 @@ function App() {
     setDrag(0);
   }
   return (
-    <div className={`app theme-${theme}`}>
+    <div
+      className={`app ${welcome ? "mode-welcome" : "mode-app"} page-${tab} ${keyboardOpen ? "keyboard-open" : ""} theme-${welcome ? "rose" : theme}`}
+    >
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
       <header className="topbar">
         <button
           className="brand"
-          onClick={() => setTab("discover")}
+          onClick={() => {
+            setTab("discover");
+            if (welcome) window.scrollTo(0, 0);
+          }}
           aria-label="Accueil SkillSwap"
         >
           <span className="brand-mark">
             s<span>s</span>
           </span>
-          skillswap<span className="brand-dot">®</span>
+          skillswap
         </button>
         <span className="header-note">
           Des talents à partager. Des liens à créer.
@@ -351,52 +385,22 @@ function App() {
             onClick={() => setTab("profile")}
             aria-label="Mon profil"
           >
-            G
+            {profile.name.charAt(0).toUpperCase()}
           </button>
         </div>
       </header>
       <main>
-        {tab === "discover" && (
+        {welcome && <Welcome onEnter={enterApp} />}
+        {!welcome && tab === "discover" && (
           <section className="discover">
-            <div className="discover-intro">
-              <div className="eyebrow">
-                <span className="line" />
-                LA RENCONTRE FAIT LE TALENT
-              </div>
-              <h1>
-                Un talent.
-                <br />
-                Une <em>rencontre.</em>
-              </h1>
-              <p>
-                Quelqu’un sait ce que tu veux apprendre.
-                <br />
-                Et si vous vous trouviez ?
-              </p>
-              <div className="community">
-                <div className="avatar-stack">
-                  {people.slice(0, 3).map((p) => (
-                    <img key={p.id} src={p.avatar} alt="" />
-                  ))}
-                </div>
-                <span>
-                  Chacun a quelque chose
-                  <br />
-                  <strong>à partager.</strong>
-                </span>
-              </div>
-              <div className="intro-bottom">
-                <Sparkles size={18} />
-                <span>
-                  Échange des compétences,
-                  <br />
-                  pas de l’argent.
-                </span>
-              </div>
-            </div>
             <div className="discovery-stage">
               <div className="stage-top">
-                <span>À découvrir</span>
+                <div className="discovery-heading">
+                  <span className="eyebrow">POUR TOI</span>
+                  <h1>
+                    Découvrir<span>.</span>
+                  </h1>
+                </div>
                 <button
                   className="filter-button"
                   onClick={() => setModal("filters")}
@@ -487,10 +491,8 @@ function App() {
                         <div className="back-heading">
                           <img src={person.avatar} alt="" />
                           <div>
-                            <span>FAISONS CONNAISSANCE</span>
-                            <h2>
-                              Moi, c’est <em>{person.name}.</em>
-                            </h2>
+                            <span>LE PROFIL</span>
+                            <h2>{person.name}</h2>
                           </div>
                         </div>
                         <p className="bio">{person.description}</p>
@@ -590,7 +592,7 @@ function App() {
             </aside>
           </section>
         )}
-        {tab === "messages" && (
+        {!welcome && tab === "messages" && (
           <section className={`messages-page ${chat ? "chat-open" : ""}`}>
             <div className="inbox">
               <div className="eyebrow">LES LIENS COMMENCENT ICI</div>
@@ -711,7 +713,7 @@ function App() {
             </div>
           </section>
         )}
-        {tab === "profile" && (
+        {!welcome && tab === "profile" && (
           <section className="own-profile">
             <div className="profile-cover glass">
               <span className="eyebrow">TON PETIT UNIVERS</span>
@@ -794,6 +796,10 @@ function App() {
                 </div>
               </div>
             </div>
+            <button className="replay-guide" onClick={() => setWelcome(true)}>
+              <Repeat2 size={16} />
+              Revoir le petit guide
+            </button>
             <button className="about-link" onClick={() => setModal("about")}>
               À propos de SkillSwap et du projet scolaire{" "}
               <ArrowUpRight size={15} />
@@ -801,25 +807,29 @@ function App() {
           </section>
         )}
       </main>
-      <nav className="bottom-nav glass" aria-label="Navigation principale">
-        {[
-          { id: "discover", label: "Découverte", icon: Compass },
-          { id: "messages", label: "Messages", icon: MessageCircle },
-          { id: "profile", label: "Profil", icon: UserRound },
-        ].map((t) => (
-          <button
-            key={t.id}
-            className={tab === t.id ? "active" : ""}
-            onClick={() => setTab(t.id)}
-            aria-current={tab === t.id ? "page" : undefined}
-          >
-            <t.icon size={22} strokeWidth={1.6} />
-            <span>{t.label}</span>
-            {tab === t.id && <i />}
-          </button>
-        ))}
-      </nav>
-      <span className="desktop-footer">FAIT POUR S’ENTRAIDER.</span>
+      {!welcome && (
+        <nav className="bottom-nav glass" aria-label="Navigation principale">
+          {[
+            { id: "discover", label: "Découverte", icon: Compass },
+            { id: "messages", label: "Messages", icon: MessageCircle },
+            { id: "profile", label: "Profil", icon: UserRound },
+          ].map((t) => (
+            <button
+              key={t.id}
+              className={tab === t.id ? "active" : ""}
+              onClick={() => setTab(t.id)}
+              aria-current={tab === t.id ? "page" : undefined}
+            >
+              <t.icon size={22} strokeWidth={1.6} />
+              <span>{t.label}</span>
+              {tab === t.id && <i />}
+            </button>
+          ))}
+        </nav>
+      )}
+      {!welcome && (
+        <span className="desktop-footer">SKILLSWAP · UN PEU PLUS HUMAIN.</span>
+      )}
       {toast && (
         <div className="toast glass" role="status">
           <Check size={18} />

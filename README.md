@@ -148,7 +148,7 @@ Le dossier `dist/` peut être publié sur un hébergement statique HTTPS. La pub
 - Signalement simulé, blocage local et conseils de prudence. Aucune modération réelle.
 - Données conservées dans le stockage local du navigateur : aucun compte, serveur, paiement ou appel réel. La sauvegarde GitHub conserve le code, pas les conversations locales.
 
-Les noms, compétences et messages sont fictifs. Le visuel d’ongles est généré pour ce prototype ; les autres images et avatars sont des illustrations SVG créées pour le projet. Toutes les images et polices sont livrées localement. Les polices Instrument Serif et DM Sans sont fournies via leurs paquets Fontsource ; leurs licences sont incluses dans ces paquets.
+Les noms, compétences et messages sont fictifs. Le visuel d’ongles est généré pour ce prototype ; les portraits sont également générés et fictifs. Les visuels de services autres que les ongles sont des illustrations SVG créées pour le projet. Toutes les images et polices sont livrées localement. Les polices Space Grotesk et Manrope sont fournies via leurs paquets Fontsource ; leurs licences sont incluses dans ces paquets.
 
 ### Vérification
 
@@ -179,3 +179,19 @@ Le dépôt contient `vercel.json` avec les paramètres Vite : installation `npm 
 Depuis un compte Vercel, importer `Zeboss-pgmg/LinkUp-` avec l’intégration GitHub et choisir la branche de production `main`, sans sous-dossier racine ni variables secrètes. Autoriser l’accès au dépôt s’il est privé, puis lancer Deploy. Vercel fournit l’adresse HTTPS après le déploiement. Les prochains pushs sur `main` pourront déclencher les mises à jour automatiquement.
 
 Le dépôt et sa configuration sont prêts ; cela ne signifie pas que le projet a déjà été importé ou publié sur Vercel.
+
+
+## Révision du 15 octobre 2026 — guide et expérience mobile
+
+- La présentation initiale devient un guide de trois étapes, avec un bouton **Accéder à l’appli**. La navigation de l’app n’apparaît qu’après cette action. L’entrée est mémorisée sur cet appareil ; le guide reste accessible depuis le profil.
+- L’app démarre sur la découverte plein écran, séparée de la présentation. Carte et commandes s’adaptent à la hauteur disponible, y compris sur petit iPhone ; l’interface tient dans le viewport sans défilement de la page de découverte.
+- Les avatars dessinés sont remplacés par des photos de profil générées pour les quatre personnages fictifs. Le texte et les informations du verso sont conservés, comme demandé. Aucun portrait ne représente un utilisateur réel.
+- Typographie revue : Space Grotesk pour les titres, Manrope pour les textes. Suppression de l’italique décoratif, vocabulaire de services plus direct et polices livrées localement.
+- Messagerie adaptée au viewport visuel du téléphone ; la navigation s’efface lorsque le clavier réduit fortement la place disponible.
+- Tests : parcours d’échange existants, guide et retour au guide, persistance, absence de chevauchement entre commandes et navigation sur plusieurs tailles d’iPhone, et glissements avec événements tactiles Chromium.
+
+Les images affichées sont optimisées en WebP (portraits de 256 pixels, visuel principal limité à 1000 pixels de large). Les originaux générés ont été conservés dans l’environnement de création, hors du dépôt.
+
+Les tests tactiles Chromium ne remplacent pas une validation sur Safari/iPhone réel. Le push GitHub déclenche la mise à jour Vercel si le projet est connecté à la branche `main` ; l’état de ce déploiement doit être vérifié dans Vercel.
+
+[Aperçu du guide d’entrée](docs/guide-iphone.png) · [Verso du profil avec photo](docs/verso-iphone.png)
