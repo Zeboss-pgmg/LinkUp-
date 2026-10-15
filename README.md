@@ -148,7 +148,7 @@ Le dossier `dist/` peut être publié sur un hébergement statique HTTPS. La pub
 - Signalement simulé, blocage local et conseils de prudence. Aucune modération réelle.
 - Données conservées dans le stockage local du navigateur : aucun compte, serveur, paiement ou appel réel. La sauvegarde GitHub conserve le code, pas les conversations locales.
 
-Les noms, compétences et messages sont fictifs. Le visuel d’ongles est généré pour ce prototype ; les portraits sont également générés et fictifs. Les visuels de services autres que les ongles sont des illustrations SVG créées pour le projet. Toutes les images et polices sont livrées localement. Les polices Space Grotesk et Manrope sont fournies via leurs paquets Fontsource ; leurs licences sont incluses dans ces paquets.
+Les noms, compétences et messages sont fictifs. Le visuel d’ongles est généré pour ce prototype ; les portraits sont également générés et fictifs. Les visuels de services autres que les ongles sont des illustrations SVG créées pour le projet. Toutes les images et polices sont livrées localement. Les polices Bricolage Grotesque et IBM Plex Sans sont fournies via leurs paquets Fontsource ; leurs licences sont incluses dans ces paquets.
 
 ### Vérification
 
@@ -186,7 +186,7 @@ Le dépôt et sa configuration sont prêts ; cela ne signifie pas que le projet 
 - La présentation initiale devient un guide de trois étapes, avec un bouton **Accéder à l’appli**. La navigation de l’app n’apparaît qu’après cette action. L’entrée est mémorisée sur cet appareil ; le guide reste accessible depuis le profil.
 - L’app démarre sur la découverte plein écran, séparée de la présentation. Carte et commandes s’adaptent à la hauteur disponible, y compris sur petit iPhone ; l’interface tient dans le viewport sans défilement de la page de découverte.
 - Les avatars dessinés sont remplacés par des photos de profil générées pour les quatre personnages fictifs. Le texte et les informations du verso sont conservés, comme demandé. Aucun portrait ne représente un utilisateur réel.
-- Typographie revue : Space Grotesk pour les titres, Manrope pour les textes. Suppression de l’italique décoratif, vocabulaire de services plus direct et polices livrées localement.
+- Typographie revue : Bricolage Grotesque pour les titres, IBM Plex Sans pour les textes. Suppression de l’italique décoratif, vocabulaire de services plus direct et polices livrées localement.
 - Messagerie adaptée au viewport visuel du téléphone ; la navigation s’efface lorsque le clavier réduit fortement la place disponible.
 - Tests : parcours d’échange existants, guide et retour au guide, persistance, absence de chevauchement entre commandes et navigation sur plusieurs tailles d’iPhone, et glissements avec événements tactiles Chromium.
 
@@ -246,3 +246,12 @@ Les fichiers de ressources copiées dans les projets natifs ne sont pas versionn
 [Aperçu Explorer](docs/explorer-iphone.png) · [Aperçu du profil enrichi](docs/profil-iphone.png)
 
 Validation de cette révision : quinze tests de parcours web réussis, un test de production hors connexion réussi, compilation TypeScript/Vite réussie et synchronisation Capacitor iOS/Android réussie. Aucun binaire natif compilé ou signé ; test réel Safari/iPhone et publication App Store restent à effectuer.
+
+
+## Identité SkillSwap — papier, encre, citron
+
+L’interface partagée adopte une palette stable : papier `#f4f1e8`, vert encre `#193d32` et citron `#ddf879`. Les titres utilisent Bricolage Grotesque et les textes IBM Plex Sans, inclus localement via Fontsource. Le monogramme, les icônes d’installation et les ressources natives suivent cette identité. Les ambiances personnelles des profils restent personnalisables et continuent d’accompagner leurs photos.
+
+Explorer présente des domaines numérotés, sans les anciens halos et cercles décoratifs. Sa première entrée, **Créer une compétence**, ouvre un formulaire dédié à une offre de savoir-faire. La compétence est enregistrée comme annonce fictive et apparaît dans les compétences du profil tant qu’elle est active ; elle peut être modifiée ou archivée avec les autres annonces. Aucune publication à de vrais utilisateurs n’a lieu.
+
+Les licences des deux polices sont également distribuées dans `public/licenses/`. Validation de cette révision : seize tests de parcours web et un test hors connexion réussis ; build et synchronisation des projets mobiles réussis.

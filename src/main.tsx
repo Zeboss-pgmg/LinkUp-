@@ -31,11 +31,11 @@ import {
   Smartphone,
   Download,
 } from "lucide-react";
-import "@fontsource/manrope/latin-400.css";
-import "@fontsource/manrope/latin-500.css";
-import "@fontsource/manrope/latin-600.css";
-import "@fontsource/space-grotesk/latin-500.css";
-import "@fontsource/space-grotesk/latin-600.css";
+import "@fontsource/ibm-plex-sans/latin-400.css";
+import "@fontsource/ibm-plex-sans/latin-500.css";
+import "@fontsource/ibm-plex-sans/latin-600.css";
+import "@fontsource/bricolage-grotesque/latin-600.css";
+import "@fontsource/bricolage-grotesque/latin-700.css";
 import Welcome from "./Welcome";
 import { Capacitor } from "@capacitor/core";
 import WebUpdates from "./components/WebUpdates";
@@ -55,6 +55,7 @@ import Library from "./components/Library";
 import BottomNav from "./components/BottomNav";
 import { type Listing } from "./listings";
 import "./complete.css";
+import "./identity.css";
 type Msg = { text: string; mine: boolean };
 type Booking = {
   id: number;
@@ -140,6 +141,7 @@ function App() {
     read("ss-listings", []),
   );
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [skillComposer, setSkillComposer] = useState(false);
   const [incomingListing, setIncomingListing] = useState<Listing | null>(null);
   const completedOnce = useRef(new Set<number>());
   const [blocked, setBlocked] = useState<number[]>(() =>
@@ -247,6 +249,7 @@ function App() {
     timer.current = setTimeout(() => setToast(""), 3500);
   }
   function publish() {
+    setSkillComposer(false);
     setEditingListing(null);
     setModal("listing");
   }
@@ -258,7 +261,11 @@ function App() {
     persist("ss-listings", value);
     setModal(null);
     setTab("profile");
-    notify("Annonce fictive enregistrée dans ton profil");
+    notify(
+      skillComposer
+        ? "Compétence ajoutée à ton profil"
+        : "Annonce fictive enregistrée dans ton profil",
+    );
   }
   function acceptDemoRequest() {
     if (!incomingListing) return;
@@ -482,10 +489,10 @@ function App() {
           }}
           aria-label="Accueil SkillSwap"
         >
-          <span className="brand-mark">
-            s<span>s</span>
+          <img className="brand-symbol" src="./icon.svg" alt="" />
+          <span className="brand-word">
+            skill<strong>swap</strong>
           </span>
-          skillswap
         </button>
         <span className="header-note">
           Des talents à partager. Des liens à créer.
@@ -796,6 +803,11 @@ function App() {
             }}
             onSelect={selectPerson}
             onPublish={publish}
+            onCreateSkill={() => {
+              setSkillComposer(true);
+              setEditingListing(null);
+              setModal("listing");
+            }}
             saved={saved}
             onSave={toggleSaved}
           />
@@ -1008,12 +1020,21 @@ function App() {
                   <Sparkles size={21} />
                 </div>
                 <div className="skill-chips">
-                  {profile.skills
-                    .split(",")
-                    .filter(Boolean)
-                    .map((skill: string, i: number) => (
-                      <span key={i}>{skill.trim()}</span>
-                    ))}
+                  {Array.from(
+                    new Set<string>([
+                      ...profile.skills
+                        .split(",")
+                        .map((s: string) => s.trim())
+                        .filter(Boolean),
+                      ...listings
+                        .filter(
+                          (l) => l.kind === "offer" && l.status === "published",
+                        )
+                        .map((l) => l.title),
+                    ]),
+                  ).map((skill, i) => (
+                    <span key={i}>{skill}</span>
+                  ))}
                 </div>
                 <h3>Et ce que j’aimerais apprendre</h3>
                 <p>{profile.looking}</p>
@@ -1062,6 +1083,7 @@ function App() {
               )}
               onPublish={publish}
               onEdit={(l) => {
+                setSkillComposer(false);
                 setEditingListing(l);
                 setModal("listing");
               }}
@@ -1337,6 +1359,7 @@ function App() {
               <ListingComposer
                 key={editingListing?.id || "new"}
                 initial={editingListing}
+                asSkill={skillComposer}
                 onSave={saveListing}
               />
             )}

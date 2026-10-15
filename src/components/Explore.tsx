@@ -15,6 +15,7 @@ type Props = {
   onCategory: (name: string) => void;
   onSelect: (id: number) => void;
   onPublish: () => void;
+  onCreateSkill: () => void;
   saved: number[];
   onSave: (id: number) => void;
 };
@@ -24,6 +25,7 @@ export default function Explore({
   onCategory,
   onSelect,
   onPublish,
+  onCreateSkill,
   saved,
   onSave,
 }: Props) {
@@ -40,11 +42,11 @@ export default function Explore({
   return (
     <section className="explore-page">
       <div className="page-heading">
-        <span className="eyebrow">SUIS TA CURIOSITÉ</span>
+        <span className="eyebrow">LE COIN DES SAVOIR-FAIRE</span>
         <h1>
-          Explorer<span>.</span>
+          Ça s’apprend<span>.</span>
         </h1>
-        <p>Une idée en tête ? Trouve le bon coup de main.</p>
+        <p>Choisis un domaine. Ou partage ce que tu sais faire.</p>
       </div>
       <div className="explore-search">
         <Search size={19} />
@@ -66,7 +68,9 @@ export default function Explore({
         )}
       </div>
       <div className="explore-heading">
-        <h2>À toi de choisir</h2>
+        <h2>
+          Les domaines<span className="section-number"> / 08</span>
+        </h2>
         <button
           className={onlySaved ? "saved-filter active" : "saved-filter"}
           onClick={() => setOnlySaved(!onlySaved)}
@@ -77,7 +81,21 @@ export default function Explore({
         </button>
       </div>
       <div className="category-grid">
-        {categoryInfo.map((c) => (
+        <button
+          className="create-skill-tile"
+          onClick={onCreateSkill}
+          aria-label="Créer une compétence"
+        >
+          <span className="create-skill-icon">
+            <Plus size={25} strokeWidth={1.5} />
+          </span>
+          <span>
+            <strong>Créer une compétence</strong>
+            <small>Ajoute ce que tu sais faire.</small>
+          </span>
+          <ArrowUpRight size={22} />
+        </button>
+        {categoryInfo.map((c, i) => (
           <button
             key={c.name}
             className={`category-tile theme-${c.color} ${category === c.name ? "selected" : ""}`}
@@ -87,14 +105,20 @@ export default function Explore({
             aria-label={c.name}
             aria-pressed={category === c.name}
           >
-            <div className="category-tile-icon">
-              <CategoryIcon name={c.icon} />
-              <ArrowUpRight size={13} />
+            <div className="category-tile-top">
+              <span>{String(i + 1).padStart(2, "0")}</span>
+              <ArrowUpRight size={15} />
+            </div>
+            <div className="category-symbol">
+              <CategoryIcon name={c.icon} size={34} />
             </div>
             <strong>{c.short}</strong>
-            <span>
-              {people.filter((p) => p.category === c.name).length} service(s)
-              fictif(s)
+            <span className="category-count">
+              {people.filter((p) => p.category === c.name).length} service
+              {people.filter((p) => p.category === c.name).length > 1
+                ? "s"
+                : ""}{" "}
+              à découvrir
             </span>
           </button>
         ))}

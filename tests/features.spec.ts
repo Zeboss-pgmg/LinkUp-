@@ -161,3 +161,23 @@ test("a provider earns fictional credits once after accepting and completing a d
   await page.getByRole("button", { name: "Profil", exact: true }).click();
   await expect(page.locator(".balance")).toContainText("6");
 });
+
+
+test('dedicated create-skill entry saves a skill in the profile and supports archiving',async({page})=>{
+ await page.setViewportSize({width:320,height:568});
+ await page.getByRole('button',{name:'Explorer',exact:true}).click();
+ await page.getByRole('button',{name:'Créer une compétence',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Créer une compétence.'})).toBeVisible();
+ await page.getByLabel('Nom de la compétence').fill('Réparer un vélo');
+ await page.getByLabel('Ce qu’on fera ensemble').fill('Un atelier fictif pour comprendre les gestes simples de réparation d’un vélo.');
+ await page.getByRole('combobox',{name:'Catégorie',exact:true}).selectOption('Vie pratique');
+ await page.getByRole('button',{name:'Ajouter ma compétence',exact:true}).click();
+ await expect(page.locator('.skill-chips')).toContainText('Réparer un vélo');
+ await expect(page.locator('.own-listing')).toContainText('Réparer un vélo');
+ await page.reload();await page.getByRole('button',{name:'Profil',exact:true}).click();
+ await expect(page.locator('.skill-chips')).toContainText('Réparer un vélo');
+ await page.getByRole('button',{name:'Archiver Réparer un vélo'}).click();
+ await expect(page.locator('.skill-chips')).not.toContainText('Réparer un vélo');
+ await page.getByRole('button',{name:'Réactiver Réparer un vélo'}).click();
+ await expect(page.locator('.skill-chips')).toContainText('Réparer un vélo');
+});

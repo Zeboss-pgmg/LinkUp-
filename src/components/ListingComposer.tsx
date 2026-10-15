@@ -5,8 +5,10 @@ import { emptyListing, type Listing } from "../listings";
 export default function ListingComposer({
   initial,
   onSave,
+  asSkill = false,
 }: {
   initial: Listing | null;
+  asSkill?: boolean;
   onSave: (l: Listing) => void;
 }) {
   const [value, setValue] = useState<Listing>(
@@ -25,28 +27,34 @@ export default function ListingComposer({
         });
       }}
     >
-      <span className="eyebrow">TON SAVOIR A SA PLACE ICI</span>
+      <span className="eyebrow">FAIS TOURNER TON SAVOIR-FAIRE</span>
       <h2>
-        {initial ? "Modifier" : "Créer"} ton <em>annonce.</em>
+        {asSkill
+          ? "Créer une compétence."
+          : initial
+            ? "Modifier ton annonce."
+            : "Créer ton annonce."}
       </h2>
-      <div className="listing-kinds">
-        <button
-          type="button"
-          className={value.kind === "offer" ? "selected" : ""}
-          onClick={() => setValue({ ...value, kind: "offer" })}
-        >
-          Je propose un service
-        </button>
-        <button
-          type="button"
-          className={value.kind === "request" ? "selected" : ""}
-          onClick={() => setValue({ ...value, kind: "request" })}
-        >
-          Je cherche de l’aide
-        </button>
-      </div>
+      {!asSkill && (
+        <div className="listing-kinds">
+          <button
+            type="button"
+            className={value.kind === "offer" ? "selected" : ""}
+            onClick={() => setValue({ ...value, kind: "offer" })}
+          >
+            Je propose un service
+          </button>
+          <button
+            type="button"
+            className={value.kind === "request" ? "selected" : ""}
+            onClick={() => setValue({ ...value, kind: "request" })}
+          >
+            Je cherche de l’aide
+          </button>
+        </div>
+      )}
       <label className="field-label">
-        Titre du service
+        {asSkill ? "Nom de la compétence" : "Titre du service"}
         <input
           required
           minLength={5}
@@ -169,9 +177,11 @@ export default function ListingComposer({
           value.title.trim().length < 5 || value.description.trim().length < 20
         }
       >
-        {initial
-          ? "Enregistrer les modifications"
-          : "Publier mon annonce fictive"}
+        {asSkill
+          ? "Ajouter ma compétence"
+          : initial
+            ? "Enregistrer les modifications"
+            : "Publier mon annonce fictive"}
         <ArrowUpRight size={18} />
       </button>
     </form>

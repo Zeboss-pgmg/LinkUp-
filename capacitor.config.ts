@@ -3,12 +3,12 @@ const config: CapacitorConfig = {
   appId: "fr.zeboss.skillswap",
   appName: "SkillSwap",
   webDir: "dist",
-  backgroundColor: "#f6edf1",
+  backgroundColor: "#f4f1e8",
   ios: {
-    backgroundColor: "#f6edf1",
+    backgroundColor: "#f4f1e8",
     contentInset: "never",
     allowsLinkPreview: false,
   },
-  android: { backgroundColor: "#f6edf1", allowMixedContent: false },
+  android: { backgroundColor: "#f4f1e8", allowMixedContent: false },
 };
 export default config;
