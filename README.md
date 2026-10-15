@@ -41,7 +41,7 @@ Une messagerie entre amis inspirée d’Instagram et des appels inspirés de Tea
 
 - **Accueil / Découverte :** la première page permet de parcourir les profils.
 - **Découverte :** une section pour parcourir des profils, avec un profil principal à la fois et la possibilité de « matcher » pour échanger des services. La présentation s’inspire des applications de rencontre, mais le match porte sur l’entraide.
-- **Profil :** deuxième section, avec présentation, compétences, annonces, personnalisation et points LinkUp.
+- **Profil :** section personnelle, avec présentation, compétences, annonces, personnalisation et points LinkUp.
 - **Messages :** conversations autour des services et entre amis. Le premier DM ouvre directement une conversation.
 - **Calendrier :** accessible par un bouton discret allongé dans le profil ; panneau presque plein écran sur téléphone et fenêtre centrée sur ordinateur. Il ne constitue pas un onglet supplémentaire.
 
@@ -134,11 +134,11 @@ npm run build
 npm run preview
 ```
 
-Le dossier `dist/` peut être publié sur un hébergement statique HTTPS. La publication n’est pas réalisée par le simple push GitHub. Sur iPhone : ouvrir l’adresse HTTPS dans Safari, puis Partager → Sur l’écran d’accueil. Il s’agit d’une application web, pas d’une application native ni d’une publication App Store. Pas de fonctionnement hors connexion garanti.
+Le dossier `dist/` peut être publié sur un hébergement statique HTTPS. La publication n’est pas réalisée par le simple push GitHub. Sur iPhone : ouvrir l’adresse HTTPS dans Safari, puis Partager → Sur l’écran d’accueil. Il s’agit d’une application web, pas d’une application native ni d’une publication App Store. Le fonctionnement hors connexion est préparé par un service worker après le premier chargement complet ; il doit être vérifié dans le navigateur utilisé.
 
 ### Fonctionnalités réalisées
 
-- Quatre profils fictifs, ambiances coordonnées et filtres par compétences.
+- Quatre membres fictifs présentant douze services, ambiances coordonnées et filtres par compétences.
 - Geste à droite ou diagonal haut-droite pour retourner la carte ; geste inverse pour le recto ; geste vers le bas pour le profil suivant. Alternative ordinateur : flèches du clavier sur la carte et bouton de profil suivant.
 - Signe d’intérêt avec état « en attente » ; la démo ne simule pas une véritable acceptation par un autre utilisateur.
 - Conversations locales, sans transmission réseau ni interlocuteur réel.
@@ -206,3 +206,43 @@ La découverte accompagne le glissement du doigt, affiche une indication de gest
 Les conversations rappellent le service et proposent des amorces de message : elles remplissent le champ sans envoyer automatiquement. La discussion défile jusqu’au dernier message. Le profil permet de choisir un des portraits fictifs de démonstration, avec sauvegarde locale.
 
 La compilation et dix tests de parcours et de disposition sont utilisés pour valider ces changements. La vérification sur un iPhone/Safari réel reste à effectuer.
+
+
+## Catalogue, annonces et distribution mobile — 15 octobre 2026
+
+La navigation possède maintenant quatre destinations : **Découverte, Explorer, Messages et Profil**. Le catalogue comporte huit catégories : Beauté & création, Photo & vidéo, Art & artisanat, Musique, Cours & langues, Numérique, Cuisine et Vie pratique. La recherche ignore la casse et les accents. Les quatre membres fictifs proposent plusieurs services ; les conversations de démonstration sont liées au service choisi.
+
+Les favoris sont indépendants des signes d’intérêt. Le profil rassemble les favoris, intérêts envoyés, annonces et échanges terminés. Les annonces peuvent proposer un service ou demander de l’aide, avec durée, points fictifs, mode d’échange et ambiance. Elles peuvent être modifiées, archivées et réactivées. **Elles restent sur cet appareil, sans publication à d’autres membres.**
+
+Pour tester le rôle de prestataire : créer une annonce de service, ouvrir Mes annonces, choisir Tester une demande, accepter la demande fictive et confirmer la réalisation dans le calendrier. Les crédits sont gagnés une seule fois à la fin. Les réservations en tant que demandeur continuent de débiter les crédits puis de les restituer en cas d’annulation.
+
+Les profils bloqués peuvent être débloqués. Le profil donne accès aux instructions d’installation et à la suppression des seules données SkillSwap de démonstration. Les pages publiques `privacy.html`, `support.html` et `conditions.html` décrivent le périmètre et les limites.
+
+### Version web installable
+
+Le build inclut un service worker avec cache des ressources locales. Après le premier chargement complet, l’app peut se rouvrir hors connexion. Une mise à jour disponible est proposée à l’utilisateur, sans recharger automatiquement une saisie en cours. Le fonctionnement hors connexion est vérifié sur le build de production avec :
+
+```sh
+npm run test:offline
+```
+
+Les tests ordinaires (`npm test`) utilisent le serveur de développement, où le service worker n’est pas activé. Les nouvelles dépendances restent verrouillées par `package-lock.json`.
+
+### Projets natifs
+
+Les projets **iOS et Android** sont inclus. La cible iOS est `fr.zeboss.skillswap`, avec ressources embarquées, icônes et écran de lancement. La version web et ces projets partagent la même application React. Le projet iOS est synchronisé, mais **aucun binaire iOS n’a été compilé ou signé** dans ce cloud Linux. Le porteur du projet a confirmé ne pas encore disposer de Mac ni de compte Apple Developer.
+
+Lire [les instructions de publication Apple](docs/APPLE_RELEASE.md) pour les étapes restantes, les propositions de fiche et les limites. La publication App Store n’est pas effectuée. La version web peut être utilisée indépendamment de cette démarche.
+
+```sh
+npm run native:sync
+npm run ios:open
+# ou
+npm run android:open
+```
+
+Les fichiers de ressources copiées dans les projets natifs ne sont pas versionnés : `native:sync` les régénère. Les sources Xcode et Android Studio sont conservées. Ne jamais ajouter de certificats ou de secrets de signature. Les icônes natives peuvent être recréées depuis le dessin vectoriel avec `npm run assets:native` ; cet outil de développement nécessite Chromium/Chrome ou un navigateur Playwright installé.
+
+[Aperçu Explorer](docs/explorer-iphone.png) · [Aperçu du profil enrichi](docs/profil-iphone.png)
+
+Validation de cette révision : quinze tests de parcours web réussis, un test de production hors connexion réussi, compilation TypeScript/Vite réussie et synchronisation Capacitor iOS/Android réussie. Aucun binaire natif compilé ou signé ; test réel Safari/iPhone et publication App Store restent à effectuer.

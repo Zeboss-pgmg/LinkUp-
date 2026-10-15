@@ -26,6 +26,10 @@ import {
   Coins,
   Palette,
   MapPin,
+  Bookmark,
+  Search,
+  Smartphone,
+  Download,
 } from "lucide-react";
 import "@fontsource/manrope/latin-400.css";
 import "@fontsource/manrope/latin-500.css";
@@ -33,80 +37,24 @@ import "@fontsource/manrope/latin-600.css";
 import "@fontsource/space-grotesk/latin-500.css";
 import "@fontsource/space-grotesk/latin-600.css";
 import Welcome from "./Welcome";
+import { Capacitor } from "@capacitor/core";
+import WebUpdates from "./components/WebUpdates";
 import "./style.css";
 import "./experience.css";
 
-type Person = {
-  id: number;
-  name: string;
-  skill: string;
-  category: string;
-  image: string;
-  avatar: string;
-  theme: string;
-  description: string;
-  looking: string;
-  duration: string;
-  cost: number;
-};
-const people: Person[] = [
-  {
-    id: 1,
-    name: "Léa",
-    skill: "Nail art & manucure.",
-    category: "Beauté & création",
-    image: "./images/nails.webp",
-    avatar: "./images/lea.webp",
-    theme: "rose",
-    description:
-      "J’adore transformer une idée en petits détails colorés. Je te propose une initiation au nail art : préparation, motifs et création de ton propre style.",
-    looking: "Un coup de main pour mes montages vidéo",
-    duration: "1 h",
-    cost: 1,
-  },
-  {
-    id: 2,
-    name: "Noah",
-    skill: "Photo au smartphone.",
-    category: "Photo & vidéo",
-    image: "./images/camera.svg",
-    avatar: "./images/noah.webp",
-    theme: "sage",
-    description:
-      "Lumière, cadrage, petits moments : je te partage mes astuces pour faire de belles photos avec ton téléphone. On apprend en créant ensemble.",
-    looking: "Pratiquer mon anglais à l’oral",
-    duration: "1 h",
-    cost: 1,
-  },
-  {
-    id: 3,
-    name: "Inès",
-    skill: "Premiers pas en céramique.",
-    category: "Art & artisanat",
-    image: "./images/pottery.svg",
-    avatar: "./images/ines.webp",
-    theme: "peach",
-    description:
-      "Une première découverte de la céramique, sans pression. On imagine une forme et on apprend les gestes de base pour la façonner.",
-    looking: "De l’aide pour créer mon portfolio",
-    duration: "2 h",
-    cost: 2,
-  },
-  {
-    id: 4,
-    name: "Adam",
-    skill: "Débuter la guitare.",
-    category: "Musique",
-    image: "./images/guitar.svg",
-    avatar: "./images/adam.webp",
-    theme: "lavender",
-    description:
-      "Tu veux commencer la guitare ? Je te montre quelques accords et on joue ton premier morceau à ton rythme.",
-    looking: "Des conseils en dessin",
-    duration: "1 h",
-    cost: 1,
-  },
-];
+import {
+  people,
+  categoryNames as categories,
+  categoryInfo,
+  demoMembers,
+  type Person,
+} from "./data";
+import Explore from "./components/Explore";
+import ListingComposer from "./components/ListingComposer";
+import Library from "./components/Library";
+import BottomNav from "./components/BottomNav";
+import { type Listing } from "./listings";
+import "./complete.css";
 type Msg = { text: string; mine: boolean };
 type Booking = {
   id: number;
@@ -114,14 +62,10 @@ type Booking = {
   day: number;
   mode: string;
   completed: boolean;
+  role?: "provider" | "receiver";
+  credits?: number;
+  title?: string;
 };
-const categories = [
-  "Tout explorer",
-  "Beauté & création",
-  "Photo & vidéo",
-  "Art & artisanat",
-  "Musique",
-];
 function read<T>(key: string, fallback: T): T {
   try {
     return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
@@ -191,6 +135,13 @@ function App() {
     [],
   );
   const [likes, setLikes] = useState<number[]>(() => read("ss-likes", []));
+  const [saved, setSaved] = useState<number[]>(() => read("ss-saved", []));
+  const [listings, setListings] = useState<Listing[]>(() =>
+    read("ss-listings", []),
+  );
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [incomingListing, setIncomingListing] = useState<Listing | null>(null);
+  const completedOnce = useRef(new Set<number>());
   const [blocked, setBlocked] = useState<number[]>(() =>
     read("ss-blocked", []),
   );
@@ -245,7 +196,9 @@ function App() {
         document.querySelectorAll<HTMLElement>(
           ".modal button,.modal input,.modal select,.modal textarea",
         ),
-      ).filter((x) => !x.hasAttribute("disabled"));
+      ).filter(
+        (x) => !x.hasAttribute("disabled") && x.getClientRects().length > 0,
+      );
       if (!items.length) return;
       const first = items[0],
         last = items[items.length - 1];
@@ -292,6 +245,91 @@ function App() {
     setToast(s);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setToast(""), 3500);
+  }
+  function publish() {
+    setEditingListing(null);
+    setModal("listing");
+  }
+  function saveListing(listing: Listing) {
+    const value = listings.some((l) => l.id === listing.id)
+      ? listings.map((l) => (l.id === listing.id ? listing : l))
+      : [listing, ...listings];
+    setListings(value);
+    persist("ss-listings", value);
+    setModal(null);
+    setTab("profile");
+    notify("Annonce fictive enregistrée dans ton profil");
+  }
+  function acceptDemoRequest() {
+    if (!incomingListing) return;
+    const member = people.find((p) => !blocked.includes(p.id));
+    if (!member) {
+      notify("Aucun profil disponible dans cette démo");
+      return;
+    }
+    const value = [
+      ...bookings,
+      {
+        id: Date.now(),
+        person: member.id,
+        day: 16,
+        mode: incomingListing.exchange === "direct" ? "direct" : "coins",
+        completed: false,
+        role: "provider" as const,
+        credits: incomingListing.credits,
+        title: incomingListing.title,
+      },
+    ];
+    setBookings(value);
+    persist("ss-bookings", value);
+    setModal("calendar");
+    notify(
+      "Demande fictive acceptée · confirme la réalisation après l’échange",
+    );
+  }
+  function archiveListing(id: number) {
+    const value = listings.map((l) =>
+      l.id === id
+        ? {
+            ...l,
+            status: (l.status === "archived"
+              ? "published"
+              : "archived") as Listing["status"],
+          }
+        : l,
+    );
+    setListings(value);
+    persist("ss-listings", value);
+  }
+  function toggleSaved(id: number) {
+    const value = saved.includes(id)
+      ? saved.filter((x) => x !== id)
+      : [...saved, id];
+    setSaved(value);
+    persist("ss-saved", value);
+    notify(
+      saved.includes(id)
+        ? "Profil retiré des favoris"
+        : "Profil enregistré dans tes favoris",
+    );
+  }
+  function selectPerson(id: number) {
+    if (nextTimer.current) clearTimeout(nextTimer.current);
+    transition.current = false;
+    setLeaving(false);
+    setCategory("Tout explorer");
+    setIndex(
+      Math.max(
+        0,
+        people
+          .filter((p) => !blocked.includes(p.id))
+          .findIndex((p) => p.id === id),
+      ),
+    );
+    setFlipped(false);
+    setDrag(0);
+    setVerticalDrag(0);
+    setTab("discover");
   }
   function next() {
     if (transition.current) return;
@@ -368,6 +406,13 @@ function App() {
     notify("Réservation de démonstration ajoutée au calendrier");
   }
   function complete(b: Booking) {
+    if (b.completed || completedOnce.current.has(b.id)) return;
+    completedOnce.current.add(b.id);
+    if (b.role === "provider" && b.mode === "coins") {
+      const nextBalance = balance + (b.credits || 0);
+      setBalance(nextBalance);
+      persist("ss-balance", nextBalance);
+    }
     const v = bookings.map((x) =>
       x.id === b.id ? { ...x, completed: true } : x,
     );
@@ -379,7 +424,7 @@ function App() {
     const v = bookings.filter((x) => x.id !== b.id);
     setBookings(v);
     persist("ss-bookings", v);
-    if (b.mode === "coins" && !b.completed) {
+    if (b.mode === "coins" && !b.completed && b.role !== "provider") {
       const n = balance + (people.find((p) => p.id === b.person)?.cost || 0);
       setBalance(n);
       persist("ss-balance", n);
@@ -428,7 +473,7 @@ function App() {
     >
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
-      <header className="topbar">
+      <header className="topbar" inert={!!modal} aria-hidden={!!modal}>
         <button
           className="brand"
           onClick={() => {
@@ -450,6 +495,15 @@ function App() {
             <span />
             Démo scolaire
           </button>
+          {!welcome && (
+            <button
+              className="quick-publish round"
+              onClick={publish}
+              aria-label="Publier une annonce"
+            >
+              <Plus size={20} />
+            </button>
+          )}
           <button
             className="mini-avatar"
             onClick={() => setTab("profile")}
@@ -459,7 +513,7 @@ function App() {
           </button>
         </div>
       </header>
-      <main>
+      <main inert={!!modal} aria-hidden={!!modal}>
         {welcome && <Welcome onEnter={enterApp} />}
         {!welcome && tab === "discover" && (
           <section className="discover">
@@ -481,6 +535,36 @@ function App() {
                     {category === "Tout explorer" ? "Pour toi" : category}
                   </span>
                 </button>
+              </div>
+              <div
+                className="category-rail"
+                aria-label="Catégories de services"
+              >
+                <button
+                  aria-pressed={category === "Tout explorer"}
+                  className={category === "Tout explorer" ? "selected" : ""}
+                  onClick={() => {
+                    setCategory("Tout explorer");
+                    setIndex(0);
+                    setFlipped(false);
+                  }}
+                >
+                  Pour toi
+                </button>
+                {categoryInfo.map((c) => (
+                  <button
+                    key={c.name}
+                    aria-pressed={category === c.name}
+                    className={category === c.name ? "selected" : ""}
+                    onClick={() => {
+                      setCategory(c.name);
+                      setIndex(0);
+                      setFlipped(false);
+                    }}
+                  >
+                    {c.short}
+                  </button>
+                ))}
               </div>
               {person ? (
                 <>
@@ -546,13 +630,30 @@ function App() {
                             <span className="availability-dot" />
                             Disponible pour échanger
                           </span>
-                          <button
-                            className="round glass"
-                            onClick={() => setModal("safety")}
-                            aria-label="Signaler ou bloquer"
-                          >
-                            <ShieldCheck size={18} />
-                          </button>
+                          <div className="card-top-actions">
+                            <button
+                              className="round glass save-profile"
+                              onClick={() => toggleSaved(person.id)}
+                              aria-label={`${saved.includes(person.id) ? "Retirer des favoris" : "Enregistrer"} le profil de ${person.name}`}
+                              aria-pressed={saved.includes(person.id)}
+                            >
+                              <Bookmark
+                                size={17}
+                                fill={
+                                  saved.includes(person.id)
+                                    ? "currentColor"
+                                    : "none"
+                                }
+                              />
+                            </button>
+                            <button
+                              className="round glass"
+                              onClick={() => setModal("safety")}
+                              aria-label="Signaler ou bloquer"
+                            >
+                              <ShieldCheck size={18} />
+                            </button>
+                          </div>
                         </div>
                         <div className="card-content">
                           <span className="category-tag">
@@ -683,6 +784,21 @@ function App() {
               </span>
             </aside>
           </section>
+        )}
+        {!welcome && tab === "explore" && (
+          <Explore
+            people={people.filter((p) => !blocked.includes(p.id))}
+            category={category}
+            onCategory={(name) => {
+              setCategory(name);
+              setIndex(0);
+              setFlipped(false);
+            }}
+            onSelect={selectPerson}
+            onPublish={publish}
+            saved={saved}
+            onSave={toggleSaved}
+          />
         )}
         {!welcome && tab === "messages" && (
           <section className={`messages-page ${chat ? "chat-open" : ""}`}>
@@ -936,6 +1052,57 @@ function App() {
                 </div>
               </div>
             </div>
+            <Library
+              listings={listings}
+              saved={people.filter(
+                (p) => saved.includes(p.id) && !blocked.includes(p.id),
+              )}
+              interests={people.filter(
+                (p) => likes.includes(p.id) && !blocked.includes(p.id),
+              )}
+              onPublish={publish}
+              onEdit={(l) => {
+                setEditingListing(l);
+                setModal("listing");
+              }}
+              onArchive={archiveListing}
+              onSimulate={(l) => {
+                setIncomingListing(l);
+                setModal("incoming");
+              }}
+              onSelect={selectPerson}
+              onUnsave={toggleSaved}
+            />
+            <div className="profile-progress glass">
+              <span>{bookings.filter((b) => b.completed).length}</span>
+              <div>
+                <strong>échange(s) terminé(s)</strong>
+                <p>Chaque échange est une occasion d’apprendre.</p>
+              </div>
+              <Check size={20} />
+            </div>
+            <div className="profile-tools">
+              <button onClick={() => setModal("install")}>
+                <Smartphone size={19} />
+                Installer sur mon téléphone
+                <ArrowUpRight size={16} />
+              </button>
+              <button onClick={() => setModal("blocked")}>
+                <Ban size={19} />
+                Profils bloqués
+                <ArrowUpRight size={16} />
+              </button>
+              <button onClick={() => setModal("data")}>
+                <Download size={19} />
+                Mes données de démonstration
+                <ArrowUpRight size={16} />
+              </button>
+              <a href="./privacy.html">
+                <ShieldCheck size={19} />
+                Confidentialité
+                <ArrowUpRight size={16} />
+              </a>
+            </div>
             <button className="replay-guide" onClick={() => setWelcome(true)}>
               <Repeat2 size={16} />
               Revoir le petit guide
@@ -947,36 +1114,11 @@ function App() {
           </section>
         )}
       </main>
-      {!welcome && (
-        <nav className="bottom-nav glass" aria-label="Navigation principale">
-          <span
-            className="nav-selection"
-            aria-hidden="true"
-            style={{
-              transform: `translateX(${["discover", "messages", "profile"].indexOf(tab) * 100}%) translateX(${["discover", "messages", "profile"].indexOf(tab) * 3}px)`,
-            }}
-          />
-          {[
-            { id: "discover", label: "Découverte", icon: Compass },
-            { id: "messages", label: "Messages", icon: MessageCircle },
-            { id: "profile", label: "Profil", icon: UserRound },
-          ].map((t) => (
-            <button
-              key={t.id}
-              className={tab === t.id ? "active" : ""}
-              onClick={() => setTab(t.id)}
-              aria-current={tab === t.id ? "page" : undefined}
-            >
-              <t.icon size={22} strokeWidth={tab === t.id ? 1.9 : 1.6} />
-              <span>{t.label}</span>
-              {tab === t.id && <i />}
-            </button>
-          ))}
-        </nav>
-      )}
+      {!welcome && <BottomNav tab={tab} onChange={setTab} inert={!!modal} />}
       {!welcome && (
         <span className="desktop-footer">SKILLSWAP · UN PEU PLUS HUMAIN.</span>
       )}
+      {!Capacitor.isNativePlatform() && <WebUpdates />}
       {toast && (
         <div className="toast glass" role="status">
           <Check size={18} />
@@ -1015,7 +1157,7 @@ function App() {
                 </p>
                 <fieldset className="portrait-picker">
                   <legend>Photo du profil fictif</legend>
-                  {people.map((p) => (
+                  {demoMembers.map((p) => (
                     <button
                       key={p.id}
                       className={
@@ -1074,6 +1216,156 @@ function App() {
                 >
                   Enregistrer <Check size={18} />
                 </button>
+              </>
+            )}
+            {modal === "blocked" && (
+              <>
+                <h2>
+                  Profils <em>bloqués.</em>
+                </h2>
+                <p>
+                  Tu peux les réafficher à tout moment dans la démonstration.
+                </p>
+                {!blocked.length ? (
+                  <p>Aucun profil bloqué.</p>
+                ) : (
+                  people
+                    .filter((p) => blocked.includes(p.id))
+                    .map((p) => (
+                      <div className="unblock-row" key={p.id}>
+                        <img src={p.avatar} alt="" />
+                        <span>
+                          {p.name} · {p.category}
+                        </span>
+                        <button
+                          onClick={() => {
+                            const value = blocked.filter((id) => id !== p.id);
+                            setBlocked(value);
+                            persist("ss-blocked", value);
+                          }}
+                        >
+                          Débloquer
+                        </button>
+                      </div>
+                    ))
+                )}
+              </>
+            )}
+            {modal === "incoming" && incomingListing && (
+              <>
+                <span className="eyebrow">
+                  TESTER L’AUTRE CÔTÉ DE L’ÉCHANGE
+                </span>
+                <h2>
+                  Une demande <em>fictive.</em>
+                </h2>
+                <p>
+                  Un membre de démonstration aimerait découvrir ton service «{" "}
+                  {incomingListing.title} ».
+                </p>
+                <div className="incoming-summary">
+                  <span>
+                    <Clock3 size={17} />
+                    {incomingListing.minutes} minutes
+                  </span>
+                  <span>
+                    {incomingListing.exchange === "direct" ? (
+                      <>
+                        <Repeat2 size={17} />
+                        Échange direct
+                      </>
+                    ) : (
+                      <>
+                        <Coins size={17} />
+                        {incomingListing.credits} point(s) fictif(s) à gagner
+                      </>
+                    )}
+                  </span>
+                </div>
+                <p>
+                  Accepte la demande, puis confirme sa réalisation dans le
+                  calendrier. Les points sont crédités une seule fois, à la fin
+                  du service simulé.
+                </p>
+                <button className="primary" onClick={acceptDemoRequest}>
+                  Accepter la demande fictive <Check size={17} />
+                </button>
+              </>
+            )}
+            {modal === "data" && (
+              <>
+                <span className="eyebrow">TU GARDES LA MAIN</span>
+                <h2>
+                  Tes données, <em>ton choix.</em>
+                </h2>
+                <p>
+                  Les annonces, messages et points de cette démonstration
+                  restent sur cet appareil. Ils ne sont pas partagés avec
+                  d’autres membres.
+                </p>
+                <p>
+                  Tu peux recommencer la démo. Cette action efface les profils
+                  personnalisés, annonces, favoris, conversations et
+                  réservations enregistrés ici.
+                </p>
+                <button
+                  className="primary reset-demo"
+                  onClick={() => {
+                    for (const key of [
+                      "ss-onboarded-v2",
+                      "ss-profile",
+                      "ss-likes",
+                      "ss-saved",
+                      "ss-blocked",
+                      "ss-messages",
+                      "ss-bookings",
+                      "ss-balance",
+                      "ss-theme",
+                      "ss-listings",
+                    ])
+                      localStorage.removeItem(key);
+                    window.location.assign(
+                      window.location.pathname + "?guide=1",
+                    );
+                  }}
+                >
+                  Effacer mes données et recommencer
+                </button>
+              </>
+            )}
+            {modal === "listing" && (
+              <ListingComposer
+                key={editingListing?.id || "new"}
+                initial={editingListing}
+                onSave={saveListing}
+              />
+            )}
+            {modal === "install" && (
+              <>
+                <span className="eyebrow">SKILLSWAP, À PORTÉE DE MAIN</span>
+                <h2>
+                  Une place sur ton <em>écran.</em>
+                </h2>
+                <div className="install-icon">
+                  <img src="./icon-192.png" alt="Icône SkillSwap" />
+                </div>
+                <p>
+                  Sur iPhone, ouvre SkillSwap dans Safari, touche le bouton de
+                  partage, puis « Sur l’écran d’accueil » et « Ajouter ».
+                </p>
+                <ol className="install-steps">
+                  <li>Ouvre le menu de partage de Safari.</li>
+                  <li>Choisis « Sur l’écran d’accueil ».</li>
+                  <li>Lance SkillSwap depuis sa nouvelle icône.</li>
+                </ol>
+                <p>
+                  Sur Android, utilise « Installer l’application » ou « Ajouter
+                  à l’écran d’accueil » dans le menu du navigateur.
+                </p>
+                <p className="simulation-note">
+                  L’installation web ne passe pas par l’App Store. Le prototype
+                  conserve ses données sur ton appareil.
+                </p>
               </>
             )}
             {modal === "filters" && (
@@ -1206,9 +1498,10 @@ function App() {
                         </span>
                         <div>
                           <strong>
-                            {p.name} · {p.category}
+                            {b.title || `${p.name} · ${p.category}`}
                           </strong>
                           <span>
+                            {b.role === "provider" ? "Tu proposes · " : ""}
                             Octobre 2026 · 14 h ·{" "}
                             {b.completed
                               ? "Terminé"

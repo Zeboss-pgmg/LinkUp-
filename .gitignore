@@ -5,3 +5,22 @@ playwright-report/
 *.log
 
 *.tsbuildinfo
+
+# Generated native bundles and local signing settings
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+ios/App/Pods/
+ios/App/DerivedData/
+**/xcuserdata/
+android/.gradle/
+android/local.properties
+android/app/build/
+android/build/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+*.jks
+*.keystore
+*.p12
+*.mobileprovision

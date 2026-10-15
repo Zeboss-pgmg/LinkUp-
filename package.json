@@ -7,9 +7,18 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "playwright test"
+    "test": "playwright test",
+    "native:sync": "npm run build && cap sync",
+    "ios:open": "cap open ios",
+    "android:open": "cap open android",
+    "native:copy": "npm run build && cap copy",
+    "test:offline": "npm run build && playwright test -c playwright.offline.config.ts",
+    "assets:native": "node scripts/native-assets.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
     "@fontsource/manrope": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
     "lucide-react": "^0.468.0",
@@ -17,11 +26,13 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "@playwright/test": "^1.51.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "~5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }
